@@ -1,5 +1,46 @@
 @import "tailwindcss";
 
+
+
+
+html, body {
+  background-color: #f8fafc; 
+  color: #0f172a;
+}
+
+
+.card {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-200;
+}
+
+.btn {
+  @apply px-4 py-2 rounded-xl font-medium transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-indigo-600 text-white hover:bg-indigo-700;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.btn-outline {
+  @apply border border-gray-300 text-gray-700 hover:bg-gray-100;
+}
+
+.badge {
+  @apply px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-live {
+  @apply bg-green-100 text-green-700;
+}
+
+.badge-waiting {
+  @apply bg-gray-200 text-gray-700;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
