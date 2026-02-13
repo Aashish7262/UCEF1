@@ -45,12 +45,9 @@ export default function ProfilePage() {
           const res = await fetch(`/api/events?role=admin`);
           const data = await res.json();
           const myEvents = (data.events || []).filter(
-           (event: any) => event.createdBy === u
+            (event: any) => event.createdBy === u
           );
-
-        setEvents(myEvents);
-
-         
+          setEvents(myEvents);
         }
 
         if (r === "student") {
@@ -58,17 +55,16 @@ export default function ProfilePage() {
           const data = await res.json();
           setParticipations(data.participations || []);
 
-      const certRes = await fetch(
-  `/api/certificates/student?studentId=${u}`
-);
-const certData = await certRes.json();
+          const certRes = await fetch(
+            `/api/certificates/student?studentId=${u}`
+          );
+          const certData = await certRes.json();
 
-setCertificateCount(
-  Array.isArray(certData.certificates)
-    ? certData.certificates.length
-    : 0
-);
-
+          setCertificateCount(
+            Array.isArray(certData.certificates)
+              ? certData.certificates.length
+              : 0
+          );
         }
       } finally {
         setLoading(false);
@@ -80,162 +76,185 @@ setCertificateCount(
 
   if (loading) {
     return (
-      <p className="text-center mt-20 text-gray-600">
+      <p className="text-center mt-24 text-white/70">
         Loading profile…
       </p>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      {/* Header */}
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-extrabold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Profile Overview
-        </h1>
-        <p className="mt-3 text-gray-600">
-          Welcome back, <span className="font-semibold">{name}</span> 👋
-        </p>
+    <div className="min-h-screen bg-black text-white px-6 py-20 overflow-hidden">
+
+      {/* background aura */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
       </div>
 
-      
-      {role === "admin" && (
-        <>
-          <SectionTitle title="Admin Dashboard" />
+      <div className="relative max-w-7xl mx-auto">
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <StatCard label="Total Events" value={events.length} />
-            <StatCard
-              label="Live Events"
-              value={events.filter(e => e.status === "live").length}
-            />
-            <StatCard
-              label="Draft Events"
-              value={events.filter(e => e.status === "draft").length}
-            />
-          </div>
+        {/* Header */}
+        <div className="mb-16 text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold
+                         bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
+                         bg-clip-text text-transparent">
+            Profile Overview
+          </h1>
 
-          <SectionTitle title="Your Events" />
+          <p className="mt-4 text-gray-400">
+            Welcome back, <span className="font-semibold text-white">{name}</span> 👋
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {events.map(event => {
-              const start = new Date(event.eventDate);
-              const end = new Date(event.endDate);
+        {/* ================= ADMIN ================= */}
+        {role === "admin" && (
+          <>
+            <SectionTitle title="Admin Dashboard" />
 
-              const canViewParticipants =
-                event.status === "live" &&
-                today >= start &&
-                today <= end;
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
+              <StatCard label="Total Events" value={events.length} />
+              <StatCard
+                label="Live Events"
+                value={events.filter(e => e.status === "live").length}
+              />
+              <StatCard
+                label="Draft Events"
+                value={events.filter(e => e.status === "draft").length}
+              />
+            </div>
 
-              return (
-                <div
-                  key={event._id}
-                  className="bg-white border rounded-3xl p-6 shadow-md hover:shadow-xl transition"
-                >
-                  <h3 className="text-xl font-semibold">
-                    {event.title}
-                  </h3>
+            <SectionTitle title="Your Events" />
 
-                  <p className="mt-2 text-sm text-gray-500">
-                    📅 {start.toDateString()} → {end.toDateString()}
-                  </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {events.map(event => {
+                const start = new Date(event.eventDate);
+                const end = new Date(event.endDate);
 
-                  <div className="mt-4 flex items-center gap-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        event.status === "live"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {event.status.toUpperCase()}
-                    </span>
+                const canViewParticipants =
+                  event.status === "live" &&
+                  today >= start &&
+                  today <= end;
+
+                return (
+                  <div
+                    key={event._id}
+                    className="relative rounded-3xl p-[2px]
+                               bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
+                  >
+                    <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6">
+
+                      <h3 className="text-xl font-semibold">
+                        {event.title}
+                      </h3>
+
+                      <p className="mt-2 text-sm text-gray-400">
+                        📅 {start.toDateString()} → {end.toDateString()}
+                      </p>
+
+                      <div className="mt-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            event.status === "live"
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-white/20 text-white/70"
+                          }`}
+                        >
+                          {event.status.toUpperCase()}
+                        </span>
+                      </div>
+
+                      {canViewParticipants && (
+                        <Link
+                          href={`/admin/events/${event._id}/participants`}
+                          className="inline-block mt-5 px-4 py-2 rounded-xl
+                                     bg-blue-500 hover:bg-blue-600
+                                     text-black text-sm font-semibold
+                                     transition"
+                        >
+                          View Participants
+                        </Link>
+                      )}
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </>
+        )}
 
-                  {canViewParticipants && (
-                    <Link
-                      href={`/admin/events/${event._id}/participants`}
-                      className="inline-block mt-5 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
-                    >
-                      View Participants
-                    </Link>
-                  )}
+        {/* ================= STUDENT ================= */}
+        {role === "student" && (
+          <>
+            <SectionTitle title="Your Participation Journey" />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
+              <StatCard label="Registered" value={participations.length} />
+              <StatCard
+                label="Attended"
+                value={participations.filter(p => p.status === "attended").length}
+              />
+              <StatCard
+                label="Certificates"
+                value={certificateCount}
+              />
+            </div>
+
+            <SectionTitle title="Event History" />
+
+            <div className="space-y-6">
+              {participations.map((p, idx) => (
+                <div
+                  key={idx}
+                  className="relative rounded-3xl p-[2px]
+                             bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
+                >
+                  <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6
+                                  flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                    <div>
+                      <p className="font-semibold">
+                        Event ID
+                      </p>
+                      <p className="text-sm text-gray-400 break-all">
+                        {p.event}
+                      </p>
+
+                      <span
+                        className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-medium ${
+                          p.status === "attended"
+                            ? "bg-green-500/20 text-green-400"
+                            : "bg-yellow-500/20 text-yellow-400"
+                        }`}
+                      >
+                        {p.status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    {p.certificate && (
+                      <Link
+                        href={`/certificates/${p.certificate}`}
+                        className="px-5 py-2 rounded-xl
+                                   bg-purple-500 hover:bg-purple-600
+                                   text-black text-sm font-semibold
+                                   transition"
+                      >
+                        View Certificate
+                      </Link>
+                    )}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {/* ================= STUDENT ================= */}
-      {role === "student" && (
-        <>
-          <SectionTitle title="Your Participation Journey" />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <StatCard
-              label="Registered"
-              value={participations.length}
-            />
-            <StatCard
-              label="Attended"
-              value={participations.filter(p => p.status === "attended").length}
-            />
-            <StatCard
-              label="Certificates"
-              value={certificateCount}
-            />
-          </div>
-
-          <SectionTitle title="Event History" />
-
-          <div className="space-y-6">
-            {participations.map((p, idx) => (
-              <div
-                key={idx}
-                className="bg-white border rounded-3xl p-6 shadow-md hover:shadow-xl transition flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-              >
-                <div>
-                  <p className="font-semibold text-gray-800">
-                    Event ID
-                  </p>
-                  <p className="text-sm text-gray-500 break-all">
-                    {p.event}
-                  </p>
-
-                  <span
-                    className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-medium ${
-                      p.status === "attended"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {p.status.toUpperCase()}
-                  </span>
-                </div>
-
-                {p.certificate && (
-                  <Link
-                    href={`/certificates/${p.certificate}`}
-                    className="px-5 py-2 rounded-xl bg-purple-600 text-white text-sm hover:bg-purple-700 transition"
-                  >
-                    View Certificate
-                  </Link>
-                )}
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-/* ================= REUSABLE UI ================= */
-
 function SectionTitle({ title }: { title: string }) {
   return (
-    <h2 className="text-2xl font-bold mb-6 text-gray-900">
+    <h2 className="text-2xl font-bold mb-6">
       {title}
     </h2>
   );
@@ -243,11 +262,14 @@ function SectionTitle({ title }: { title: string }) {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-white/80 backdrop-blur border rounded-3xl p-6 text-center shadow-md">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-4xl font-extrabold text-gray-900 mt-2">
-        {value}
-      </p>
+    <div className="relative rounded-3xl p-[2px]
+                    bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+      <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 text-center">
+        <p className="text-sm text-gray-400">{label}</p>
+        <p className="text-4xl font-extrabold mt-2 text-white">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }

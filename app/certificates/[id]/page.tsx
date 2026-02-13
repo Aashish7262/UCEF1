@@ -22,7 +22,6 @@ export default function CertificatePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
- 
   const [aiMessage, setAiMessage] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -46,7 +45,6 @@ export default function CertificatePage() {
     fetchCertificate();
   }, [id]);
 
-  
   const generateAchievementMessage = async () => {
     if (!certificate) return;
 
@@ -71,54 +69,75 @@ export default function CertificatePage() {
   };
 
   if (loading) {
-    return <p className="text-center mt-20 text-lg">Loading certificate…</p>;
+    return (
+      <p className="text-center mt-24 text-white/70">
+        Loading certificate…
+      </p>
+    );
   }
 
   if (error || !certificate) {
     return (
-      <p className="text-center mt-20 text-red-600 text-lg">
+      <p className="text-center mt-24 text-red-400 text-lg">
         {error || "Certificate not found"}
       </p>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#0f172a] via-[#020617] to-black flex flex-col items-center px-6 py-14 print:bg-white">
+    <div className="min-h-screen bg-black text-white flex flex-col items-center px-6 py-16 overflow-hidden print:bg-white">
 
-      
-      <div className="w-full max-w-5xl mb-10 p-6 rounded-2xl bg-linear-to-r from-indigo-50 to-purple-50 border border-indigo-200">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-gray-800">
-            🎁 Your AI Achievement Message
-          </h3>
+      {/* background aura */}
+      <div className="pointer-events-none fixed inset-0 print:hidden">
+        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
+      </div>
 
-          <button
-            type="button"
-            onClick={generateAchievementMessage}
-            disabled={aiLoading}
-            className="text-xs px-4 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
-          >
-            {aiLoading ? "Generating..." : "Generate"}
-          </button>
+      {/* AI MESSAGE CARD */}
+      <div className="relative w-full max-w-5xl mb-12 rounded-3xl p-[2px]
+                      bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 print:hidden">
+
+        <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6">
+
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-white">
+              🎁 Your AI Achievement Message
+            </h3>
+
+            <button
+              type="button"
+              onClick={generateAchievementMessage}
+              disabled={aiLoading}
+              className="text-xs px-4 py-1.5 rounded-lg
+                         border border-white/20
+                         hover:border-white hover:bg-white/10
+                         disabled:opacity-50 transition"
+            >
+              {aiLoading ? "Generating..." : "Generate"}
+            </button>
+          </div>
+
+          {aiMessage ? (
+            <p className="text-gray-300 italic leading-relaxed">
+              {aiMessage}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-400">
+              Click generate to receive your personalized achievement message ✨
+            </p>
+          )}
         </div>
-
-        {aiMessage ? (
-          <p className="text-gray-700 italic leading-relaxed">
-            {aiMessage}
-          </p>
-        ) : (
-          <p className="text-sm text-gray-500">
-            Click generate to receive your personalized achievement message ✨
-          </p>
-        )}
       </div>
 
       {/* CERTIFICATE */}
       <div
         id="certificate"
-        className="relative w-full max-w-5xl bg-white rounded-[28px] shadow-[0_30px_80px_rgba(0,0,0,0.4)] p-14 print:shadow-none print:border print:border-gray-300"
+        className="relative w-full max-w-5xl bg-white rounded-[28px]
+                   shadow-[0_30px_80px_rgba(0,0,0,0.5)]
+                   p-14 print:shadow-none print:border print:border-gray-300"
       >
-        {/* Gold Border */}
+
+        {/* Premium Gold Border */}
         <div className="absolute inset-0 rounded-[28px] border-[10px] border-yellow-400 pointer-events-none" />
 
         {/* Decorative corners */}
@@ -192,7 +211,10 @@ export default function CertificatePage() {
         <div className="mt-16 flex justify-center print:hidden">
           <button
             onClick={() => window.print()}
-            className="px-10 py-3 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-xl text-lg font-semibold hover:scale-105 transition shadow-lg"
+            className="px-10 py-3 rounded-xl text-lg font-semibold
+                       bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500
+                       text-black hover:brightness-110
+                       transition-all duration-300 shadow-lg"
           >
             Download Certificate
           </button>

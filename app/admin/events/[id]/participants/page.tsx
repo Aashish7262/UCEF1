@@ -91,113 +91,137 @@ export default function AdminParticipantsPage() {
 
   if (loading) {
     return (
-      <p className="text-center mt-20 text-gray-600">
+      <p className="text-center mt-24 text-white/70">
         Loading participants…
       </p>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      
-      <div className="mb-8">
-        <h1 className="text-4xl font-extrabold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Attendance Dashboard
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Event: <span className="font-semibold">{eventTitle}</span>
-        </p>
+    <main className="min-h-screen bg-black text-white overflow-hidden px-6 py-16">
+
+      {/* background aura */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
+        <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
       </div>
 
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3">
-          {error}
+      <div className="relative max-w-7xl mx-auto">
+
+        {/* HEADER */}
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold
+                         bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
+                         bg-clip-text text-transparent">
+            Attendance Dashboard
+          </h1>
+
+          <p className="mt-2 text-gray-400">
+            Event: <span className="font-semibold text-white">{eventTitle}</span>
+          </p>
         </div>
-      )}
 
-      {participants.length === 0 ? (
-        <p className="text-gray-600">
-          No students have participated yet.
-        </p>
-      ) : (
-        <div className="overflow-x-auto bg-white/80 backdrop-blur border rounded-3xl shadow-lg">
-          <table className="w-full">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
-                  Student
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
-                  Email
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
-                  Attendance
-                </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
-                  Registered At
-                </th>
-              </tr>
-            </thead>
+        {error && (
+          <div className="mb-8 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3">
+            {error}
+          </div>
+        )}
 
-            <tbody>
-              {participants.map((p) => (
-                <tr
-                  key={p._id}
-                  className="border-t hover:bg-gray-50 transition"
-                >
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {p.student.name}
-                  </td>
+        {participants.length === 0 ? (
+          <p className="text-gray-400">
+            No students have participated yet.
+          </p>
+        ) : (
+          <div className="relative rounded-3xl p-[2px]
+                          bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
 
-                  <td className="px-6 py-4 text-gray-600">
-                    {p.student.email}
-                  </td>
+            <div className="rounded-3xl bg-black/70 backdrop-blur-xl overflow-x-auto">
 
-                  
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <select
-                        value={p.status}
-                        onChange={(e) =>
-                          updateAttendance(
-                            p._id,
-                            e.target.value as
-                              | "registered"
-                              | "attended"
-                              | "absent"
-                          )
-                        }
-                        className="px-3 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                      >
-                        <option value="registered">Registered</option>
-                        <option value="attended">Attended</option>
-                        <option value="absent">Absent</option>
-                      </select>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                      Student
+                    </th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                      Email
+                    </th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                      Attendance
+                    </th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                      Registered At
+                    </th>
+                  </tr>
+                </thead>
 
-                      {p.status === "attended" && (
-                        <span className="text-green-600 text-xl font-bold">
-                          ✔
-                        </span>
-                      )}
+                <tbody>
+                  {participants.map((p) => (
+                    <tr
+                      key={p._id}
+                      className="border-t border-white/10
+                                 hover:bg-white/5 transition"
+                    >
+                      <td className="px-6 py-4 font-medium">
+                        {p.student.name}
+                      </td>
 
-                      {p.status === "absent" && (
-                        <span className="text-red-500 text-xl font-bold">
-                          ✖
-                        </span>
-                      )}
-                    </div>
-                  </td>
+                      <td className="px-6 py-4 text-gray-400">
+                        {p.student.email}
+                      </td>
 
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(p.participatedAt).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <select
+                            value={p.status}
+                            onChange={(e) =>
+                              updateAttendance(
+                                p._id,
+                                e.target.value as
+                                  | "registered"
+                                  | "attended"
+                                  | "absent"
+                              )
+                            }
+                            className="px-3 py-2 rounded-xl
+                                       bg-black/60 border border-white/20
+                                       text-white
+                                       focus:outline-none focus:border-purple-400
+                                       focus:ring-2 focus:ring-purple-500/30
+                                       transition"
+                          >
+                            <option value="registered">Registered</option>
+                            <option value="attended">Attended</option>
+                            <option value="absent">Absent</option>
+                          </select>
+
+                          {p.status === "attended" && (
+                            <span className="text-green-400 text-xl font-bold">
+                              ✔
+                            </span>
+                          )}
+
+                          {p.status === "absent" && (
+                            <span className="text-red-400 text-xl font-bold">
+                              ✖
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-gray-400">
+                        {new Date(p.participatedAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
 

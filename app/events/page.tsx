@@ -139,169 +139,216 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <p className="text-center mt-20 text-gray-600">
+      <p className="text-center mt-24 text-white/70">
         Loading events…
       </p>
     );
   }
 
-  /* ================= UI ================= */
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="flex items-center justify-between mb-10">
-        <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Events
-        </h1>
+    <main className="min-h-screen bg-black text-white overflow-hidden">
 
-        {role === "admin" && (
-          <Link
-            href="/admin/create-event"
-            className="px-6 py-3 rounded-2xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow-md"
-          >
-            + Create Event
-          </Link>
-        )}
+      {/* background aura */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
+        <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
       </div>
 
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3">
-          {error}
-        </div>
-      )}
+      <div className="relative max-w-7xl mx-auto px-6 py-20">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {events.map((event) => {
-          const participation = participations[event._id];
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-16">
+          <h1 className="text-4xl md:text-5xl font-extrabold
+                         bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
+                         bg-clip-text text-transparent">
+            Events
+          </h1>
 
-          const now = new Date();
-          const startDate = new Date(event.eventDate);
-          const endDate = new Date(event.endDate);
-
-          const isWithinDateRange =
-            now >= startDate && now <= endDate;
-          const isExpired = now > endDate;
-
-          return (
-            <div
-              key={event._id}
-              className="border rounded-3xl p-6 bg-white shadow-md hover:shadow-xl transition"
+          {role === "admin" && (
+            <Link
+              href="/admin/create-event"
+              className="px-6 py-3 rounded-2xl font-semibold
+                         bg-white/10 backdrop-blur
+                         border border-white/20
+                         hover:border-white hover:bg-white/20
+                         transition-all duration-300"
             >
-              <h2 className="text-2xl font-semibold text-gray-900">
-                {event.title}
-              </h2>
+              + Create Event
+            </Link>
+          )}
+        </div>
 
-              <p className="mt-2 text-gray-600 line-clamp-3">
-                {event.description}
-              </p>
+        {error && (
+          <div className="mb-10 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3">
+            {error}
+          </div>
+        )}
 
-              <p className="mt-3 text-sm text-gray-500">
-                📅 Start: {startDate.toDateString()}
-              </p>
-              <p className="text-sm text-gray-500">
-                ⏳ End: {endDate.toDateString()}
-              </p>
+        {/* EVENTS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
+          {events.map((event) => {
+            const participation = participations[event._id];
 
-              <div className="mt-4">
-                {isExpired ? (
-                  <span className="px-3 py-1 rounded-full text-sm bg-red-100 text-red-700">
-                    EXPIRED
-                  </span>
-                ) : event.status === "live" ? (
-                  <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">
-                    LIVE
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700">
-                    DRAFT
-                  </span>
-                )}
-              </div>
+            const now = new Date();
+            const startDate = new Date(event.eventDate);
+            const endDate = new Date(event.endDate);
 
-              {/* ACTIONS */}
-              <div className="mt-6 flex flex-wrap gap-3">
-                {/* ADMIN */}
-                {role === "admin" &&
-                  event.createdBy === userId && (
-                    <>
-                      {event.status === "draft" &&
-                        isWithinDateRange && (
-                          <button
-                            onClick={() =>
-                              makeEventLive(event._id)
-                            }
-                            className="px-4 py-2 bg-green-600 text-white rounded-xl"
-                          >
-                            Make Live
-                          </button>
-                        )}
+            const isWithinDateRange =
+              now >= startDate && now <= endDate;
+            const isExpired = now > endDate;
 
-                      {event.status === "live" && (
-                        <Link
-                          href={`/admin/events/${event._id}/participants`}
-                          className="px-4 py-2 border rounded-xl"
-                        >
-                          View Participants
-                        </Link>
-                      )}
-                    </>
-                  )}
+            return (
+              <div
+                key={event._id}
+                className="group relative rounded-3xl p-[2px]
+                           bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500
+                           hover:scale-[1.03] transition-all duration-300"
+              >
+                <div className="relative rounded-3xl bg-black/70 backdrop-blur-xl p-6 h-full overflow-hidden">
 
-                {/* STUDENT */}
-                {role === "student" &&
-                  event.status === "live" &&
-                  isWithinDateRange && (
-                    <>
-                      {!participation && (
-                        <button
-                          onClick={() =>
-                            handleParticipate(event._id)
-                          }
-                          className="px-4 py-2 bg-blue-600 text-white rounded-xl"
-                        >
-                          Participate
-                        </button>
-                      )}
+                  {/* glow */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100
+                                  transition duration-300
+                                  bg-gradient-to-br from-purple-500/30 to-blue-500/30
+                                  blur-2xl" />
 
-                      {participation?.status ===
-                        "registered" && (
-                        <span className="px-4 py-2 bg-gray-200 rounded-xl text-sm">
-                          Registered ✔
+                  <div className="relative z-10 flex flex-col h-full">
+                    <h2 className="text-2xl font-semibold">
+                      {event.title}
+                    </h2>
+
+                    <p className="mt-3 text-white/70 line-clamp-3">
+                      {event.description}
+                    </p>
+
+                    <p className="mt-4 text-sm text-white/50">
+                      📅 {startDate.toDateString()} –{" "}
+                      {endDate.toDateString()}
+                    </p>
+
+                    {/* STATUS */}
+                    <div className="mt-4">
+                      {isExpired ? (
+                        <span className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-300">
+                          EXPIRED
+                        </span>
+                      ) : event.status === "live" ? (
+                        <span className="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-300">
+                          LIVE
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-xs bg-white/20 text-white/70">
+                          DRAFT
                         </span>
                       )}
+                    </div>
 
-                      {participation?.status ===
-                        "attended" &&
-                        !participation.certificateId && (
-                          <button
-                            onClick={() =>
-                              handleGenerateCertificate(
-                                event._id
-                              )
-                            }
-                            className="px-4 py-2 bg-green-600 text-white rounded-xl"
-                          >
-                            Generate Certificate
-                          </button>
+                    {/* ACTIONS */}
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <Link
+                        href={`/events/${event._id}`}
+                        className="px-4 py-2 rounded-xl text-sm
+                                   border border-white/20
+                                   hover:border-white hover:bg-white/10
+                                   transition-all"
+                      >
+                        View Details
+                      </Link>
+
+                      {/* ADMIN */}
+                      {role === "admin" &&
+                        event.createdBy === userId && (
+                          <>
+                            {event.status === "draft" &&
+                              isWithinDateRange && (
+                                <button
+                                  onClick={() =>
+                                    makeEventLive(event._id)
+                                  }
+                                  className="px-4 py-2 rounded-xl text-sm
+                                             bg-green-500/80 hover:bg-green-600
+                                             transition-all"
+                                >
+                                  Make Live
+                                </button>
+                              )}
+
+                            {event.status === "live" && (
+                              <Link
+                                href={`/admin/events/${event._id}/participants`}
+                                className="px-4 py-2 rounded-xl text-sm
+                                           border border-white/20
+                                           hover:border-white hover:bg-white/10
+                                           transition-all"
+                              >
+                                Participants
+                              </Link>
+                            )}
+                          </>
                         )}
 
-                      {participation?.certificateId && (
-                        <Link
-                          href={`/certificates/${participation.certificateId}`}
-                          className="px-4 py-2 bg-purple-600 text-white rounded-xl"
-                        >
-                          Download Certificate
-                        </Link>
-                      )}
-                    </>
-                  )}
+                      {/* STUDENT */}
+                      {role === "student" &&
+                        event.status === "live" &&
+                        isWithinDateRange && (
+                          <>
+                            {!participation && (
+                              <button
+                                onClick={() =>
+                                  handleParticipate(event._id)
+                                }
+                                className="px-4 py-2 rounded-xl text-sm
+                                           bg-blue-500 hover:bg-blue-600
+                                           transition-all"
+                              >
+                                Participate
+                              </button>
+                            )}
+
+                            {participation?.status === "registered" && (
+                              <span className="px-4 py-2 rounded-xl text-sm bg-white/20">
+                                Registered ✔
+                              </span>
+                            )}
+
+                            {participation?.status === "attended" &&
+                              !participation.certificateId && (
+                                <button
+                                  onClick={() =>
+                                    handleGenerateCertificate(event._id)
+                                  }
+                                  className="px-4 py-2 rounded-xl text-sm
+                                             bg-green-500 hover:bg-green-600
+                                             transition-all"
+                                >
+                                  Generate Certificate
+                                </button>
+                              )}
+
+                            {participation?.certificateId && (
+                              <Link
+                                href={`/certificates/${participation.certificateId}`}
+                                className="px-4 py-2 rounded-xl text-sm
+                                           bg-purple-500 hover:bg-purple-600
+                                           transition-all"
+                              >
+                                Download Certificate
+                              </Link>
+                            )}
+                          </>
+                        )}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
+
 
 
 

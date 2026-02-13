@@ -19,7 +19,6 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -47,7 +46,6 @@ export default function SignupPage() {
     }
   };
 
-  /* ================= STEP 2: VERIFY OTP + SIGNUP ================= */
   const handleVerifyOtpAndSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -67,7 +65,6 @@ export default function SignupPage() {
         return;
       }
 
-      // OTP verified → NOW create account
       const signupRes = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -90,102 +87,154 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-purple-50 px-4">
-      <div className="w-full max-w-md bg-white/80 backdrop-blur border rounded-3xl shadow-xl p-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            {step === "form" ? "Create Your Account" : "Verify OTP"}
-          </h1>
-          <p className="mt-2 text-gray-600">
-            {step === "form"
-              ? "Join HackathonHub and start building 🚀"
-              : `OTP sent to ${email}`}
-          </p>
-        </div>
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 overflow-hidden">
 
-        {error && (
-          <div className="mt-6 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 text-center">
-            {error}
+      {/* background aura */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
+      </div>
+
+      <div className="relative w-full max-w-md rounded-3xl p-[2px]
+                      bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+
+        <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-8">
+
+          {/* Header */}
+          <div className="text-center">
+            <h1 className="text-3xl font-extrabold
+                           bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
+                           bg-clip-text text-transparent">
+              {step === "form" ? "Create Your Account" : "Verify OTP"}
+            </h1>
+
+            <p className="mt-2 text-gray-400">
+              {step === "form"
+                ? "Join HackathonHub and start building 🚀"
+                : `OTP sent to ${email}`}
+            </p>
           </div>
-        )}
 
-        {/* ================= FORM STEP ================= */}
-        {step === "form" && (
-          <form onSubmit={handleSendOtp} className="mt-8 space-y-5">
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border"
-            />
+          {error && (
+            <div className="mt-6 bg-red-500/10 border border-red-500/30 text-red-300 text-sm rounded-xl px-4 py-3 text-center">
+              {error}
+            </div>
+          )}
 
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border"
-            />
+          {/* ================= FORM STEP ================= */}
+          {step === "form" && (
+            <form onSubmit={handleSendOtp} className="mt-8 space-y-5">
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border"
-            />
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl
+                           bg-black/60 border border-white/20
+                           text-white
+                           focus:outline-none focus:border-purple-400
+                           focus:ring-2 focus:ring-purple-500/30
+                           transition"
+              />
 
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border"
-            >
-              <option value="student">Student</option>
-              <option value="admin">Admin</option>
-            </select>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl
+                           bg-black/60 border border-white/20
+                           text-white
+                           focus:outline-none focus:border-blue-400
+                           focus:ring-2 focus:ring-blue-500/30
+                           transition"
+              />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl text-white bg-linear-to-r from-blue-600 to-purple-600"
-            >
-              {loading ? "Sending OTP..." : "Create Account"}
-            </button>
-          </form>
-        )}
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl
+                           bg-black/60 border border-white/20
+                           text-white
+                           focus:outline-none focus:border-purple-400
+                           focus:ring-2 focus:ring-purple-500/30
+                           transition"
+              />
 
-       
-        {step === "otp" && (
-          <form onSubmit={handleVerifyOtpAndSignup} className="mt-8 space-y-5">
-            <input
-              type="text"
-              placeholder="Enter 6-digit OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border text-center tracking-widest"
-            />
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl
+                           bg-black/60 border border-white/20
+                           text-white
+                           focus:outline-none focus:border-purple-400
+                           focus:ring-2 focus:ring-purple-500/30
+                           transition"
+              >
+                <option value="student">Student</option>
+                <option value="admin">Admin</option>
+              </select>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl text-white bg-green-600"
-            >
-              {loading ? "Verifying..." : "Verify & Create Account"}
-            </button>
-          </form>
-        )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-semibold
+                           bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
+                           text-black hover:brightness-110
+                           transition-all duration-300
+                           disabled:opacity-60 shadow-lg"
+              >
+                {loading ? "Sending OTP..." : "Create Account"}
+              </button>
+            </form>
+          )}
 
-        <p className="mt-6 text-sm text-center text-gray-600">
-          Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-blue-600">
-            Login
-          </Link>
-        </p>
+          {/* ================= OTP STEP ================= */}
+          {step === "otp" && (
+            <form onSubmit={handleVerifyOtpAndSignup} className="mt-8 space-y-5">
+
+              <input
+                type="text"
+                placeholder="Enter 6-digit OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl text-center tracking-widest
+                           bg-black/60 border border-white/20
+                           text-white
+                           focus:outline-none focus:border-green-400
+                           focus:ring-2 focus:ring-green-500/30
+                           transition"
+              />
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl font-semibold
+                           bg-gradient-to-r from-green-500 to-emerald-500
+                           text-black hover:brightness-110
+                           transition-all duration-300
+                           disabled:opacity-60 shadow-lg"
+              >
+                {loading ? "Verifying..." : "Verify & Create Account"}
+              </button>
+            </form>
+          )}
+
+          <p className="mt-6 text-sm text-center text-gray-400">
+            Already have an account?{" "}
+            <Link href="/login" className="font-semibold text-blue-400 hover:underline">
+              Login
+            </Link>
+          </p>
+
+        </div>
       </div>
     </div>
   );
