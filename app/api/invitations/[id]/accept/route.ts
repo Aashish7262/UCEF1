@@ -6,13 +6,13 @@ import Hackathon from "@/models/Hackathon";
 import mongoose from "mongoose";
 
 export async function PATCH(
- req: Request,
-  context: { params: { id: string } }
+req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(

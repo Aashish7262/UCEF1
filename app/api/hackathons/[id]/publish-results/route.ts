@@ -8,12 +8,12 @@ import mongoose from "mongoose";
 
 export async function POST(
  req: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const { id } =  await context.params;
+    const { id } =  await params;
     const { userId } = await req.json();
 
     if (

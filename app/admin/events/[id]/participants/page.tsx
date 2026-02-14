@@ -15,9 +15,9 @@ interface Participant {
 }
 
 export default function AdminParticipantsPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>(); // Provide the type here
   const router = useRouter();
-  const eventId = params.id as string;
+  const eventId = params.id;
 
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [eventTitle, setEventTitle] = useState("");

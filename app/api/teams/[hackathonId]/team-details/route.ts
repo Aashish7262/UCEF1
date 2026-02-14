@@ -6,13 +6,14 @@ import mongoose from "mongoose";
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ hackathonId: string }> } // ✅ IMPORTANT FIX
+  { params }: { params: Promise<{ hackathonId: string }> }// ✅ IMPORTANT FIX
 ) {
   try {
     await connectDB();
 
     // 🔥 CRITICAL: Await params (App Router requirement)
-    const { hackathonId } = await context.params;
+    const { hackathonId } = await params;
+    
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");

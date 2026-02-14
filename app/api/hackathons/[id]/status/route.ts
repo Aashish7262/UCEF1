@@ -5,13 +5,13 @@ import { User } from "@/models/User";
 import mongoose from "mongoose";
 
 export async function PATCH(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+ req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const { id } = await context.params;
+    const { id } = await params;
     const { status, userId } = await req.json();
 
     /* ===== VALIDATE IDS ===== */

@@ -5,11 +5,11 @@ import Invitation from "@/models/Invitation";
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
 
-  const { id: hackathonId } = await context.params;
+  const { id: hackathonId } = await params;
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
   console.error(userId);

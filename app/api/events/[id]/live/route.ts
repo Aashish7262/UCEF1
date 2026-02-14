@@ -4,11 +4,11 @@ import { Event } from "@/models/Event";
 import { User } from "@/models/User";
 
 export async function PATCH(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+ req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) { 
   try {
-    const { id } = await context.params;
+    const { id } = await params;
     const { userId } = await req.json();
 
     if (!userId) {

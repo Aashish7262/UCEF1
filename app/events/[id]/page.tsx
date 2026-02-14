@@ -24,8 +24,8 @@ interface Rule {
 /* ================= PAGE ================= */
 
 export default function EventDetailsPage() {
-  const params = useParams();
-  const eventId = params.id as string;
+ const params = useParams<{ id: string }>(); // Provide the type here
+const eventId = params.id;
 
   const [event, setEvent] = useState<EventType | null>(null);
   const [rules, setRules] = useState<Rule[]>([]);

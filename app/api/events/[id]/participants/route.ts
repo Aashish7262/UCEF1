@@ -6,12 +6,12 @@ import { User } from "@/models/User";
 
 
 export async function GET(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+ req: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
    
-    const { id: eventId } = await context.params;
+    const { id: eventId } = await params;
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
