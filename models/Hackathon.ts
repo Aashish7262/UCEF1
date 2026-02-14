@@ -69,6 +69,14 @@ const HackathonSchema = new Schema(
       ],
       default: "draft",
     },
+     paymentRequired: {
+      type: Boolean,
+      default: false,
+    },
+    entryFee: {
+      type: Number,
+      default: 0,
+    },
 
     createdBy: {
       type: Schema.Types.ObjectId,

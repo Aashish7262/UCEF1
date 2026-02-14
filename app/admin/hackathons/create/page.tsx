@@ -28,6 +28,10 @@ export default function CreateHackathonPage() {
   const [submissionDeadline, setSubmissionDeadline] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔥 NEW: Payment States (ADDED ONLY)
+  const [paymentRequired, setPaymentRequired] = useState(false);
+  const [entryFee, setEntryFee] = useState(0);
+
   const addRule = () => {
     setRules([...rules, ""]);
   };
@@ -71,6 +75,8 @@ export default function CreateHackathonPage() {
         hackathonStart,
         hackathonEnd,
         submissionDeadline,
+        paymentRequired, // ✅ ADDED (backend compatibility)
+        entryFee: paymentRequired ? entryFee : 0, // ✅ SAFE LOGIC
         userId,
       }),
     });
@@ -131,6 +137,45 @@ export default function CreateHackathonPage() {
               required
               className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:outline-none"
             />
+          </div>
+
+          {/* 🔥 NEW: PAYMENT SECTION (ADDED ONLY) */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <label className="block text-white/70 mb-4 text-lg">
+              Payment Settings
+            </label>
+
+            <div className="flex items-center gap-6 mb-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={paymentRequired}
+                  onChange={(e) =>
+                    setPaymentRequired(e.target.checked)
+                  }
+                />
+                <span className="text-white/80">
+                  Paid Hackathon
+                </span>
+              </label>
+            </div>
+
+            {paymentRequired && (
+              <div>
+                <label className="block text-white/70 mb-2">
+                  Entry Fee (₹)
+                </label>
+                <input
+                  type="number"
+                  value={entryFee}
+                  onChange={(e) =>
+                    setEntryFee(Number(e.target.value))
+                  }
+                  min={0}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20"
+                />
+              </div>
+            )}
           </div>
 
           {/* Team Size */}
@@ -275,3 +320,4 @@ function DateField({
     </div>
   );
 }
+

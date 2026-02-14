@@ -11,18 +11,21 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const {
-      title,
-      description,
-      rules,
-      teamSizeMin,
-      teamSizeMax,
-      registrationStart,
-      registrationDeadline,
-      hackathonStart,
-      hackathonEnd,
-      submissionDeadline,
-      userId,
-    } = body;
+  title,
+  description,
+  rules,
+  teamSizeMin,
+  teamSizeMax,
+  registrationStart,
+  registrationDeadline,
+  hackathonStart,
+  hackathonEnd,
+  submissionDeadline,
+  userId,
+  paymentRequired,
+  entryFee,
+} = body;
+
 
     if (!title || !description || !userId) {
       return NextResponse.json(
@@ -39,19 +42,22 @@ export async function POST(req: Request) {
     }
 
     const hackathon = await Hackathon.create({
-      title,
-      description,
-      rules,
-      teamSizeMin,
-      teamSizeMax,
-      registrationStart,
-      registrationDeadline,
-      hackathonStart,
-      hackathonEnd,
-      submissionDeadline,
-      status: "draft",
-      createdBy: new mongoose.Types.ObjectId(userId),
-    });
+  title,
+  description,
+  rules,
+  teamSizeMin,
+  teamSizeMax,
+  registrationStart,
+  registrationDeadline,
+  hackathonStart,
+  hackathonEnd,
+  submissionDeadline,
+  paymentRequired: paymentRequired ?? false,
+  entryFee: entryFee ?? 0,
+  status: "draft",
+  createdBy: new mongoose.Types.ObjectId(userId),
+});
+
 
     return NextResponse.json({ hackathon }, { status: 201 });
 

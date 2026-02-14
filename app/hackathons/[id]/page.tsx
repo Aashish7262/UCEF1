@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import LeaderboardDisplay from "@/components/LeaderboardDisplay";
-
 interface Hackathon {
   _id: string;
   title: string;
   description: string;
   status: string;
+  paymentRequired?: boolean; // NEW (safe)
+  entryFee?: number; // NEW (safe)
 }
+
 
 export default function HackathonDetailsPage() {
   const { id } = useParams();
@@ -34,13 +36,25 @@ export default function HackathonDetailsPage() {
   const [demoLink, setDemoLink] = useState("");
   const [presentationLink, setPresentationLink] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
   const [submitting, setSubmitting] = useState(false);
 
   /* ===== Load Role + User ===== */
-  useEffect(() => {
-    setRole(localStorage.getItem("role"));
-    setUserId(localStorage.getItem("userId"));
-  }, []);
+useEffect(() => {
+  setRole(localStorage.getItem("role"));
+  setUserId(localStorage.getItem("userId"));
+
+  // 🔥 FIX: Persist Thank You after payment redirect
+  if (id) {
+    const submittedFlag = localStorage.getItem(`submitted_${id}`);
+    if (submittedFlag === "true") {
+      setHasSubmitted(true);
+    }
+  }
+}, [id]);
+
+
 
   /* ===== Fetch Hackathon (Auto Refresh Every 5s) ===== */
   useEffect(() => {
@@ -78,12 +92,53 @@ export default function HackathonDetailsPage() {
       console.error("Failed to fetch team status");
     }
   };
+  /* ===== CHECK IF TEAM ALREADY SUBMITTED ===== */
+/* ===== CHECK IF TEAM ALREADY SUBMITTED ===== */
+const checkSubmissionStatus = async () => {
+  if (!hackathon?._id || !teamStatus?.teamId) return;
+
+  // 🔥 STEP 1: FIRST check localStorage (after payment redirect)
+  const localFlag = localStorage.getItem(`submitted_${hackathon._id}`);
+  if (localFlag === "true") {
+    setHasSubmitted(true);
+    return; // STOP here (prevents flicker)
+  }
+
+  // 🔥 STEP 2: THEN fallback to backend check
+  try {
+    const res = await fetch(
+      `/api/submissions/${hackathon._id}?teamId=${teamStatus.teamId}`
+    );
+    const data = await res.json();
+
+    if (res.ok && data.submission) {
+      setHasSubmitted(true);
+      // Sync local flag for future reloads
+      localStorage.setItem(`submitted_${hackathon._id}`, "true");
+    } else {
+      setHasSubmitted(false);
+    }
+  } catch (error) {
+    console.error("Failed to check submission status");
+  }
+};
+
+
+
+
 
   useEffect(() => {
-    if (role === "student" && userId && hackathon?._id) {
-      fetchTeamStatus();
-    }
-  }, [role, userId, hackathon?._id, hackathon?.status]);
+  if (role === "student" && userId && hackathon?._id) {
+    fetchTeamStatus();
+  }
+}, [role, userId, hackathon?._id, hackathon?.status]);
+
+useEffect(() => {
+  if (teamStatus?.teamId && hackathon?._id) {
+    checkSubmissionStatus();
+  }
+}, [teamStatus?.teamId, hackathon?._id]);
+
 
   /* ===== Create Team ===== */
   const handleCreateTeam = async () => {
@@ -234,42 +289,62 @@ export default function HackathonDetailsPage() {
   };
 
   /* ===== Submit Prototype ===== */
-  const handleSubmitPrototype = async () => {
-    if (!githubLink || !demoLink || !presentationLink) {
-      alert("Please fill all required fields");
-      return;
-    }
+const handleSubmitPrototype = async () => {
+  if (!githubLink || !demoLink || !presentationLink) {
+    alert("Please fill all required fields");
+    return;
+  }
 
-    try {
-      setSubmitting(true);
-
-      const res = await fetch("/api/submissions/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hackathonId: hackathon?._id,
-          teamId: teamStatus?.teamId,
-          userId,
-          githubLink,
-          demoLink,
-          presentationLink,
-          description: projectDescription,
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("Submission successful");
-        router.push("/hackathons");
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.error("Submission failed");
-    } finally {
-      setSubmitting(false);
-    }
+  // 🔥 STEP 1: Save submission draft locally before payment
+  const draftSubmission = {
+    hackathonId: hackathon?._id,
+    teamId: teamStatus?.teamId,
+    userId,
+    githubLink,
+    demoLink,
+    presentationLink,
+    description: projectDescription,
   };
+
+  // Save to localStorage (TEMP)
+  localStorage.setItem(
+    "pendingSubmission",
+    JSON.stringify(draftSubmission)
+  );
+
+  // 🔥 STEP 2: If paid hackathon → go to payment page
+  if (hackathon?.paymentRequired) {
+    router.push(`/hackathons/${hackathon._id}/payment`);
+    return;
+  }
+
+  // FREE hackathon → direct submit (unchanged)
+  try {
+    setSubmitting(true);
+
+    const res = await fetch("/api/submissions/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draftSubmission),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.removeItem("pendingSubmission"); // cleanup
+      alert("Submission successful");
+      router.push("/hackathons");
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error("Submission failed");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+
 
   if (loading || !hackathon) {
     return (
@@ -307,20 +382,58 @@ export default function HackathonDetailsPage() {
             <label className="block text-sm text-white/50 mb-3 font-medium">
               Change Status
             </label>
+<div className="flex flex-wrap gap-3">
+  {hackathon.status === "draft" && (
+    <button
+      disabled={updating}
+      onClick={() => handleStatusChange("registration-open")}
+      className="px-5 py-2 rounded-xl bg-green-500 hover:bg-green-400 text-black font-semibold transition-all shadow-lg"
+    >
+      Open Registration
+    </button>
+  )}
 
-            <select
-              value={hackathon.status}
-              disabled={updating}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/40"
-            >
-              <option value="draft">draft</option>
-              <option value="registration-open">registration-open</option>
-              <option value="registration-closed">registration-closed</option>
-              <option value="submission-open">submission-open</option>
-              <option value="evaluation">evaluation</option>
-              <option value="completed">completed</option>
-            </select>
+  {hackathon.status === "registration-open" && (
+    <button
+      disabled={updating}
+      onClick={() => handleStatusChange("registration-closed")}
+      className="px-5 py-2 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-semibold transition-all shadow-lg"
+    >
+      Close Registration
+    </button>
+  )}
+
+  {hackathon.status === "registration-closed" && (
+    <button
+      disabled={updating}
+      onClick={() => handleStatusChange("submission-open")}
+      className="px-5 py-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-black font-semibold transition-all shadow-lg"
+    >
+      Open Submission
+    </button>
+  )}
+
+  {hackathon.status === "submission-open" && (
+    <button
+      disabled={updating}
+      onClick={() => handleStatusChange("evaluation")}
+      className="px-5 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-black font-semibold transition-all shadow-lg"
+    >
+      Start Evaluation
+    </button>
+  )}
+
+  {hackathon.status === "evaluation" && (
+    <button
+      disabled={updating}
+      onClick={() => handleStatusChange("completed")}
+      className="px-5 py-2 rounded-xl bg-pink-500 hover:bg-pink-400 text-black font-semibold transition-all shadow-lg"
+    >
+      Mark as Completed
+    </button>
+  )}
+</div>
+
           </div>
         )}
 
@@ -413,8 +526,10 @@ export default function HackathonDetailsPage() {
 
         {/* ===== SUBMISSION PHASE ===== */}
         {role === "student" &&
-          hackathon.status === "submission-open" &&
-          teamStatus?.inTeam && (
+  hackathon.status === "submission-open" &&
+  teamStatus?.inTeam &&
+  !hasSubmitted && (
+
             <div className="mt-12 p-8 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
               {teamStatus.isLeader ? (
                 <div className="space-y-5">
@@ -467,6 +582,22 @@ export default function HackathonDetailsPage() {
               )}
             </div>
           )}
+          {/* ===== THANK YOU (AFTER SUBMISSION) ===== */}
+{role === "student" &&
+  hasSubmitted && (
+    <div className="mt-12 p-8 bg-white/5 border border-green-500/30 rounded-2xl backdrop-blur-xl text-center">
+      <div className="text-green-400 font-bold text-2xl mb-4">
+        🎉 Thank You for Participating!
+      </div>
+      <p className="text-white/60 text-lg">
+        Your project has been successfully submitted.
+        {hackathon.paymentRequired
+          ? " Payment was completed and your submission is locked."
+          : " Submission is locked and awaiting evaluation."}
+      </p>
+    </div>
+)}
+
       </div>
     </main>
   );
