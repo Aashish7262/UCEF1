@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -37,22 +36,24 @@ export default function Navbar() {
         bg-gradient-to-r from-transparent via-purple-500/40 to-transparent"
       />
 
-      {/* MAIN CONTAINER (RESPONSIVE FIX HERE) */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
+      {/* MAIN CONTAINER */}
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-3">
+        
         {/* Logo */}
         <Link
           href="/"
-          className="text-xl sm:text-2xl font-extrabold tracking-tight
+          className="text-lg sm:text-2xl font-extrabold tracking-tight
           bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
-          bg-clip-text text-transparent whitespace-nowrap"
+          bg-clip-text text-transparent whitespace-nowrap flex-shrink-0"
         >
           HackathonHub
         </Link>
 
-        {/* RIGHT SIDE */}
-        <div className="flex items-center gap-4 sm:gap-6 lg:gap-10 overflow-x-auto">
-          {/* Nav Links */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-10">
+        {/* RIGHT SIDE (FIXED RESPONSIVE) */}
+        <div className="flex items-center gap-3 sm:gap-6 max-w-full overflow-x-auto">
+          
+          {/* Nav Links - WILL ALWAYS SHOW */}
+          <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 whitespace-nowrap flex-shrink-0">
             {[
               { name: "Go To Resume", path: "/profile/cv" },
               { name: "Hackathon", path: "/hackathons" },
@@ -63,7 +64,7 @@ export default function Navbar() {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`relative font-medium transition-all whitespace-nowrap
+                className={`relative font-medium transition-all text-sm sm:text-base whitespace-nowrap
                   ${
                     pathname === item.path
                       ? "text-white"
@@ -71,23 +72,23 @@ export default function Navbar() {
                   }
                   after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0
                   after:bg-gradient-to-r after:from-purple-400 after:to-pink-400
-                  after:transition-all hover:after:w-full
-                `}
+                  after:transition-all hover:after:w-full`}
               >
                 {item.name}
               </Link>
             ))}
           </div>
 
+          {/* USER SECTION */}
           {name ? (
-            <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 pl-3 sm:pl-6 border-l border-white/10">
-              <span className="text-gray-400 text-sm sm:text-base whitespace-nowrap">
+            <div className="flex items-center gap-3 sm:gap-5 pl-3 sm:pl-5 border-l border-white/10 whitespace-nowrap flex-shrink-0">
+              <span className="text-gray-400 text-xs sm:text-sm">
                 Hi, <span className="font-semibold text-white">{name}</span>
               </span>
 
               <Link
                 href="/profile"
-                className={`font-medium transition whitespace-nowrap ${
+                className={`font-medium transition text-sm whitespace-nowrap ${
                   pathname === "/profile"
                     ? "text-white"
                     : "text-gray-400 hover:text-white"
@@ -98,7 +99,7 @@ export default function Navbar() {
 
               <Link
                 href="/chatbot"
-                className={`font-medium transition whitespace-nowrap ${
+                className={`font-medium transition text-sm whitespace-nowrap ${
                   pathname === "/chatbot"
                     ? "text-white"
                     : "text-gray-400 hover:text-white"
@@ -109,10 +110,10 @@ export default function Navbar() {
 
               <button
                 onClick={handleLogout}
-                className="px-4 sm:px-5 py-2 rounded-full
+                className="px-3 sm:px-5 py-2 rounded-full
                 border border-red-500/40 text-red-400
                 hover:bg-red-500 hover:text-black
-                transition whitespace-nowrap text-sm sm:text-base"
+                transition whitespace-nowrap text-xs sm:text-sm"
               >
                 Logout
               </button>
@@ -123,7 +124,7 @@ export default function Navbar() {
               className="px-4 sm:px-6 py-2 rounded-full
               bg-gradient-to-r from-purple-500 to-pink-500
               text-black font-semibold
-              hover:brightness-110 transition whitespace-nowrap text-sm sm:text-base"
+              hover:brightness-110 transition whitespace-nowrap text-sm flex-shrink-0"
             >
               Login
             </Link>
