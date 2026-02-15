@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react"
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -49,7 +50,7 @@ export default function Navbar() {
 
     <div className="flex items-center gap-10">
 
-      {[
+      {[ {name: "Go To Resume", path: "/profile/cv"},
         { name: "Hackathon", path: "/hackathons" },
         { name: "Events", path: "/events" },
         { name: "Contact Us", path: "/contact" },
@@ -90,6 +91,7 @@ export default function Navbar() {
           >
             Your Profile
           </Link>
+        
 
           <Link
             href="/chatbot"

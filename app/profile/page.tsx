@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 interface EventType {
   _id: string;
@@ -26,6 +33,11 @@ export default function ProfilePage() {
   const [participations, setParticipations] = useState<Participation[]>([]);
   const [loading, setLoading] = useState(true);
   const [certificateCount, setCertificateCount] = useState(0);
+
+  // 🔹 AI Mentor (ADDED ONLY)
+  const [mentorInsight, setMentorInsight] = useState<string>("");
+  const [mentorLoading, setMentorLoading] = useState(false);
+
   const today = new Date();
 
   useEffect(() => {
@@ -44,10 +56,11 @@ export default function ProfilePage() {
         if (r === "admin") {
           const res = await fetch(`/api/events?role=admin`);
           const data = await res.json();
-          const myEvents = (data.events || []).filter(
-            (event: any) => event.createdBy === u
+          setEvents(
+            (data.events || []).filter(
+              (event: any) => event.createdBy === u
+            )
           );
-          setEvents(myEvents);
         }
 
         if (r === "student") {
@@ -60,11 +73,30 @@ export default function ProfilePage() {
           );
           const certData = await certRes.json();
 
-          setCertificateCount(
-            Array.isArray(certData.certificates)
-              ? certData.certificates.length
-              : 0
-          );
+          const certCount = Array.isArray(certData.certificates)
+            ? certData.certificates.length
+            : 0;
+
+          setCertificateCount(certCount);
+
+          // 🔹 AI STUDENT MENTOR CALL (ADDED)
+          setMentorLoading(true);
+          fetch("/api/ai/mentor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              stats: {
+                registered: data.participations.length,
+                attended: data.participations.filter(
+                  (p: any) => p.status === "attended"
+                ).length,
+                certificates: certCount,
+              },
+            }),
+          })
+            .then(res => res.json())
+            .then(ai => setMentorInsight(ai.insight))
+            .finally(() => setMentorLoading(false));
         }
       } finally {
         setLoading(false);
@@ -81,6 +113,17 @@ export default function ProfilePage() {
       </p>
     );
   }
+
+  const attendedCount = participations.filter(
+    p => p.status === "attended"
+  ).length;
+
+  const registeredCount = participations.length;
+
+  const engagementScore =
+    attendedCount * 10 +
+    certificateCount * 20 +
+    registeredCount * 5;
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-20 overflow-hidden">
@@ -106,7 +149,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        {/* ================= ADMIN ================= */}
+        {/* ================= ADMIN (UNCHANGED) ================= */}
         {role === "admin" && (
           <>
             <SectionTitle title="Admin Dashboard" />
@@ -142,11 +185,7 @@ export default function ProfilePage() {
                                bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
                   >
                     <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6">
-
-                      <h3 className="text-xl font-semibold">
-                        {event.title}
-                      </h3>
-
+                      <h3 className="text-xl font-semibold">{event.title}</h3>
                       <p className="mt-2 text-sm text-gray-400">
                         📅 {start.toDateString()} → {end.toDateString()}
                       </p>
@@ -163,13 +202,14 @@ export default function ProfilePage() {
                         </span>
                       </div>
 
+                      
+
                       {canViewParticipants && (
                         <Link
                           href={`/admin/events/${event._id}/participants`}
                           className="inline-block mt-5 px-4 py-2 rounded-xl
                                      bg-blue-500 hover:bg-blue-600
-                                     text-black text-sm font-semibold
-                                     transition"
+                                     text-black text-sm font-semibold"
                         >
                           View Participants
                         </Link>
@@ -182,26 +222,20 @@ export default function ProfilePage() {
           </>
         )}
 
-        {/* ================= STUDENT ================= */}
+        {/* ================= STUDENT (ALL ORIGINAL CONTENT) ================= */}
         {role === "student" && (
           <>
             <SectionTitle title="Your Participation Journey" />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
-              <StatCard label="Registered" value={participations.length} />
-              <StatCard
-                label="Attended"
-                value={participations.filter(p => p.status === "attended").length}
-              />
-              <StatCard
-                label="Certificates"
-                value={certificateCount}
-              />
+              <StatCard label="Registered" value={registeredCount} />
+              <StatCard label="Attended" value={attendedCount} />
+              <StatCard label="Certificates" value={certificateCount} />
             </div>
 
             <SectionTitle title="Event History" />
 
-            <div className="space-y-6">
+            <div className="space-y-6 mb-20">
               {participations.map((p, idx) => (
                 <div
                   key={idx}
@@ -210,11 +244,8 @@ export default function ProfilePage() {
                 >
                   <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6
                                   flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
                     <div>
-                      <p className="font-semibold">
-                        Event ID
-                      </p>
+                      <p className="font-semibold">Event ID</p>
                       <p className="text-sm text-gray-400 break-all">
                         {p.event}
                       </p>
@@ -235,8 +266,7 @@ export default function ProfilePage() {
                         href={`/certificates/${p.certificate}`}
                         className="px-5 py-2 rounded-xl
                                    bg-purple-500 hover:bg-purple-600
-                                   text-black text-sm font-semibold
-                                   transition"
+                                   text-black text-sm font-semibold"
                       >
                         View Certificate
                       </Link>
@@ -244,6 +274,87 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* ======== ANALYTICS (UNCHANGED) ======== */}
+            <SectionTitle title="Participation Analytics" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20">
+              <div className="relative rounded-3xl p-[2px]
+                              bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+                <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 h-[320px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: "Attended", value: attendedCount },
+                          { name: "Registered", value: registeredCount },
+                        ]}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={90}
+                        label
+                      >
+                        <Cell fill="#22c55e" />
+                        <Cell fill="#eab308" />
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="relative rounded-3xl p-[2px]
+                              bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+                <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6
+                                flex flex-col justify-center items-center">
+                  <h3 className="text-lg font-semibold mb-6">
+                    Engagement Score
+                  </h3>
+                  <div className="text-6xl font-extrabold
+                                  bg-gradient-to-r from-green-400 to-blue-400
+                                  bg-clip-text text-transparent">
+                    {engagementScore}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ======== PERSONAL INSIGHTS (UNCHANGED) ======== */}
+            <SectionTitle title="Personal Insights" />
+
+            <div className="relative rounded-3xl p-[2px]
+                            bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 mb-24">
+              <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 space-y-3">
+                <Insight text={`You attended ${attendedCount} out of ${registeredCount} registered events.`} />
+                <Insight text={certificateCount > 0
+                  ? "You are earning certificates consistently."
+                  : "Attend events to start earning certificates."}
+                />
+                <Insight text="Participating more will increase your engagement score." />
+              </div>
+            </div>
+            
+
+            
+
+            {/* ======== AI STUDENT MENTOR (ONLY ADDITION) ======== */}
+            <SectionTitle title="AI Student Mentor" />
+
+            <div className="relative rounded-3xl p-[2px]
+                            bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 mb-24">
+              <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6">
+                {mentorLoading ? (
+                  <p className="text-gray-300 animate-pulse">
+                    🤖 Mentor is analyzing your journey…
+                  </p>
+                ) : (
+                  <p className="text-lg leading-relaxed text-white">
+                    {mentorInsight}
+                  </p>
+                )}
+              </div>
             </div>
           </>
         )}
@@ -253,11 +364,7 @@ export default function ProfilePage() {
 }
 
 function SectionTitle({ title }: { title: string }) {
-  return (
-    <h2 className="text-2xl font-bold mb-6">
-      {title}
-    </h2>
-  );
+  return <h2 className="text-2xl font-bold mb-6">{title}</h2>;
 }
 
 function StatCard({ label, value }: { label: string; value: number }) {
@@ -266,11 +373,13 @@ function StatCard({ label, value }: { label: string; value: number }) {
                     bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
       <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 text-center">
         <p className="text-sm text-gray-400">{label}</p>
-        <p className="text-4xl font-extrabold mt-2 text-white">
-          {value}
-        </p>
+        <p className="text-4xl font-extrabold mt-2 text-white">{value}</p>
       </div>
     </div>
   );
+}
+
+function Insight({ text }: { text: string }) {
+  return <p className="text-gray-300">• {text}</p>;
 }
 
