@@ -15,7 +15,7 @@ interface Participant {
 }
 
 export default function AdminParticipantsPage() {
-  const params = useParams<{ id: string }>(); // Provide the type here
+  const params = useParams<{ id: string }>();
   const router = useRouter();
   const eventId = params.id;
 
@@ -98,58 +98,61 @@ export default function AdminParticipantsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white overflow-hidden px-6 py-16">
-
-      {/* background aura */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
-        <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
+    <main className="min-h-screen bg-black text-white px-4 sm:px-6 lg:px-8 py-10 sm:py-14 md:py-16">
+      {/* background aura (responsive scaled) */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/3 w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-purple-600/20 blur-[120px] md:blur-[200px]" />
+        <div className="absolute top-1/2 right-1/4 w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-blue-600/20 blur-[120px] md:blur-[200px]" />
       </div>
 
       <div className="relative max-w-7xl mx-auto">
-
         {/* HEADER */}
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold
+        <div className="mb-8 sm:mb-10 md:mb-12">
+          <h1
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold
                          bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
-                         bg-clip-text text-transparent">
+                         bg-clip-text text-transparent"
+          >
             Attendance Dashboard
           </h1>
 
-          <p className="mt-2 text-gray-400">
-            Event: <span className="font-semibold text-white">{eventTitle}</span>
+          <p className="mt-2 text-sm sm:text-base text-gray-400">
+            Event:{" "}
+            <span className="font-semibold text-white break-words">
+              {eventTitle}
+            </span>
           </p>
         </div>
 
         {error && (
-          <div className="mb-8 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3">
+          <div className="mb-6 sm:mb-8 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 text-sm sm:text-base">
             {error}
           </div>
         )}
 
         {participants.length === 0 ? (
-          <p className="text-gray-400">
+          <p className="text-gray-400 text-sm sm:text-base">
             No students have participated yet.
           </p>
         ) : (
-          <div className="relative rounded-3xl p-[2px]
-                          bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
-
-            <div className="rounded-3xl bg-black/70 backdrop-blur-xl overflow-x-auto">
-
-              <table className="w-full">
+          <div
+            className="relative rounded-2xl sm:rounded-3xl p-[1px] sm:p-[2px]
+                          bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
+          >
+            <div className="rounded-2xl sm:rounded-3xl bg-black/70 backdrop-blur-xl overflow-x-auto">
+              <table className="w-full min-w-[600px] sm:min-w-full">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                    <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-300">
                       Student
                     </th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                    <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-300">
                       Email
                     </th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                    <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-300">
                       Attendance
                     </th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-300">
+                    <th className="text-left px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-300">
                       Registered At
                     </th>
                   </tr>
@@ -162,16 +165,16 @@ export default function AdminParticipantsPage() {
                       className="border-t border-white/10
                                  hover:bg-white/5 transition"
                     >
-                      <td className="px-6 py-4 font-medium">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base">
                         {p.student.name}
                       </td>
 
-                      <td className="px-6 py-4 text-gray-400">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-gray-400 text-sm break-words">
                         {p.student.email}
                       </td>
 
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                           <select
                             value={p.status}
                             onChange={(e) =>
@@ -184,6 +187,7 @@ export default function AdminParticipantsPage() {
                               )
                             }
                             className="px-3 py-2 rounded-xl
+                                       text-xs sm:text-sm
                                        bg-black/60 border border-white/20
                                        text-white
                                        focus:outline-none focus:border-purple-400
@@ -196,27 +200,26 @@ export default function AdminParticipantsPage() {
                           </select>
 
                           {p.status === "attended" && (
-                            <span className="text-green-400 text-xl font-bold">
+                            <span className="text-green-400 text-lg sm:text-xl font-bold">
                               ✔
                             </span>
                           )}
 
                           {p.status === "absent" && (
-                            <span className="text-red-400 text-xl font-bold">
+                            <span className="text-red-400 text-lg sm:text-xl font-bold">
                               ✖
                             </span>
                           )}
                         </div>
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-gray-400">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-400 whitespace-nowrap">
                         {new Date(p.participatedAt).toLocaleString()}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-
             </div>
           </div>
         )}

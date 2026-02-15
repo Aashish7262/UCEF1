@@ -47,26 +47,26 @@ export default function HackathonsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-white/60">
+      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-white/60 px-4 text-sm sm:text-base">
         Loading hackathons...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0b0f19] text-white px-6 py-20">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen bg-[#0b0f19] text-white px-4 sm:px-6 py-12 sm:py-16 md:py-20">
+      <div className="max-w-6xl mx-auto w-full">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-14">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-10 sm:mb-14">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             Hackathons
           </h1>
 
           {role === "admin" && (
             <Link
               href="/admin/hackathons/create"
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-black font-semibold hover:scale-105 transition"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-black font-semibold hover:scale-105 transition w-full sm:w-auto text-center"
             >
               + Create Hackathon
             </Link>
@@ -74,26 +74,26 @@ export default function HackathonsPage() {
         </div>
 
         {/* LIST */}
-        <div className="grid md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
 
           {hackathons.map((hackathon) => (
             <div
               key={hackathon._id}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-purple-500/50 transition"
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 sm:p-6 md:p-8 hover:border-purple-500/50 transition"
             >
-              <h2 className="text-2xl font-semibold mb-3">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 break-words">
                 {hackathon.title}
               </h2>
 
-              <p className="text-white/60 mb-6">
+              <p className="text-white/60 mb-6 text-sm sm:text-base break-words leading-relaxed">
                 {hackathon.description}
               </p>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 
                 {/* STATUS BADGE */}
                 <span
-                  className={`px-4 py-1 rounded-full text-xs font-semibold ${
+                  className={`px-4 py-1 rounded-full text-xs font-semibold w-fit ${
                     hackathon.status === "registration-open"
                       ? "bg-green-500/20 text-green-400"
                       : hackathon.status === "submission-open"
@@ -113,7 +113,7 @@ export default function HackathonsPage() {
                 {role === "admin" && (
                   <Link
                     href={`/hackathons/${hackathon._id}`}
-                    className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition text-sm"
+                    className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition text-sm w-full sm:w-auto text-center"
                   >
                     Manage
                   </Link>
@@ -123,7 +123,7 @@ export default function HackathonsPage() {
                   hackathon.status === "registration-open" && (
                     <Link
                       href={`/hackathons/${hackathon._id}`}
-                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-green-400 to-emerald-500 text-black font-semibold hover:scale-105 transition text-sm"
+                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-green-400 to-emerald-500 text-black font-semibold hover:scale-105 transition text-sm w-full sm:w-auto text-center"
                     >
                       Register
                     </Link>
@@ -133,7 +133,7 @@ export default function HackathonsPage() {
           ))}
 
           {hackathons.length === 0 && (
-            <div className="text-white/50">
+            <div className="text-white/50 text-sm sm:text-base">
               No hackathons available.
             </div>
           )}

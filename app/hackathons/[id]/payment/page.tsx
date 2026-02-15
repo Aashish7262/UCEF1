@@ -97,7 +97,6 @@ export default function PaymentPage() {
         /* ===== PAYMENT SUCCESS HANDLER (CRITICAL FIX) ===== */
         handler: async function () {
           try {
-            // STEP 1: Get stored draft submission
             const pendingSubmission = localStorage.getItem(
               "pendingSubmission"
             );
@@ -110,7 +109,6 @@ export default function PaymentPage() {
 
             const submissionData = JSON.parse(pendingSubmission);
 
-            // STEP 2: Final submit to backend AFTER payment
             const submitRes = await fetch(
               "/api/submissions/submit",
               {
@@ -132,20 +130,17 @@ export default function PaymentPage() {
               return;
             }
 
-            // STEP 3: Mark submission flag (for Thank You UI)
             localStorage.setItem(
               `submitted_${submissionData.hackathonId}`,
               "true"
             );
 
-            // STEP 4: Cleanup draft
             localStorage.removeItem("pendingSubmission");
 
             alert(
               "🎉 Payment Successful & Submission Completed!"
             );
 
-            // STEP 5: Proper Next.js navigation (NOT window.location)
             router.push(
               `/hackathons/${submissionData.hackathonId}`
             );
@@ -178,7 +173,7 @@ export default function PaymentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-white text-sm sm:text-base px-4">
         Loading Payment Page...
       </div>
     );
@@ -186,44 +181,44 @@ export default function PaymentPage() {
 
   if (!hackathon) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-red-400">
+      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-red-400 text-sm sm:text-base px-4 text-center">
         Hackathon not found
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#0b0f19] via-[#0f172a] to-[#020617] text-white px-6 py-20">
-      <div className="max-w-2xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-10 shadow-2xl">
+    <main className="min-h-screen bg-gradient-to-br from-[#0b0f19] via-[#0f172a] to-[#020617] text-white px-4 sm:px-6 py-12 sm:py-20">
+      <div className="max-w-2xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl">
 
-        <h1 className="text-4xl font-bold mb-6 text-center">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-5 sm:mb-6 text-center">
           💳 Hackathon Payment
         </h1>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
-          <h2 className="text-2xl font-semibold mb-2">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-2 break-words">
             {hackathon.title}
           </h2>
 
-          <p className="text-white/60 mb-4">
+          <p className="text-white/60 mb-4 text-sm sm:text-base leading-relaxed">
             {hackathon.description}
           </p>
 
-          <div className="text-lg font-semibold text-purple-400">
+          <div className="text-base sm:text-lg font-semibold text-purple-400">
             Entry Fee: ₹{hackathon.entryFee || 0}
           </div>
         </div>
 
         <button
           onClick={handlePayment}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-black font-bold text-lg hover:scale-105 transition"
+          className="w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-black font-bold text-base sm:text-lg hover:scale-[1.02] sm:hover:scale-105 transition"
         >
           Pay & Complete Submission
         </button>
 
         <button
           onClick={() => router.push(`/hackathons/${id}`)}
-          className="w-full mt-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 transition"
+          className="w-full mt-3 sm:mt-4 py-2.5 sm:py-3 rounded-xl bg-white/10 hover:bg-white/20 transition text-sm sm:text-base"
         >
           Cancel & Go Back
         </button>
@@ -231,4 +226,5 @@ export default function PaymentPage() {
     </main>
   );
 }
+
 

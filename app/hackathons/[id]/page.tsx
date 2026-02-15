@@ -295,7 +295,6 @@ const handleSubmitPrototype = async () => {
     return;
   }
 
-  // 🔥 STEP 1: Save submission draft locally before payment
   const draftSubmission = {
     hackathonId: hackathon?._id,
     teamId: teamStatus?.teamId,
@@ -306,19 +305,16 @@ const handleSubmitPrototype = async () => {
     description: projectDescription,
   };
 
-  // Save to localStorage (TEMP)
   localStorage.setItem(
     "pendingSubmission",
     JSON.stringify(draftSubmission)
   );
 
-  // 🔥 STEP 2: If paid hackathon → go to payment page
   if (hackathon?.paymentRequired) {
     router.push(`/hackathons/${hackathon._id}/payment`);
     return;
   }
 
-  // FREE hackathon → direct submit (unchanged)
   try {
     setSubmitting(true);
 
@@ -331,7 +327,7 @@ const handleSubmitPrototype = async () => {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.removeItem("pendingSubmission"); // cleanup
+      localStorage.removeItem("pendingSubmission");
       alert("Submission successful");
       router.push("/hackathons");
     } else {
@@ -358,23 +354,21 @@ const handleSubmitPrototype = async () => {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#0b0f19] via-[#0f172a] to-[#020617] text-white px-6 py-16">
-      <div className="max-w-5xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-10 shadow-2xl shadow-purple-500/5">
+    <main className="min-h-screen bg-gradient-to-br from-[#0b0f19] via-[#0f172a] to-[#020617] text-white px-4 sm:px-6 py-10 sm:py-16">
+      <div className="max-w-5xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl shadow-purple-500/5">
 
-        {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-4 tracking-tight break-words">
           {hackathon.title}
         </h1>
 
-        {/* Description */}
-        <p className="text-white/60 mb-8 text-lg leading-relaxed">
+        <p className="text-white/60 mb-6 sm:mb-8 text-base sm:text-lg leading-relaxed">
           {hackathon.description}
         </p>
 
-        {/* Status */}
         <div className="mb-10 inline-flex items-center px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 font-semibold text-sm tracking-wide">
           Current Status: {hackathon.status.toUpperCase()}
         </div>
+
 
         {/* ===== ADMIN CONTROL ===== */}
         {role === "admin" && (

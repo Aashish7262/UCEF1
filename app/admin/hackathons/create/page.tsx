@@ -28,7 +28,6 @@ export default function CreateHackathonPage() {
   const [submissionDeadline, setSubmissionDeadline] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔥 NEW: Payment States (ADDED ONLY)
   const [paymentRequired, setPaymentRequired] = useState(false);
   const [entryFee, setEntryFee] = useState(0);
 
@@ -75,8 +74,8 @@ export default function CreateHackathonPage() {
         hackathonStart,
         hackathonEnd,
         submissionDeadline,
-        paymentRequired, // ✅ ADDED (backend compatibility)
-        entryFee: paymentRequired ? entryFee : 0, // ✅ SAFE LOGIC
+        paymentRequired,
+        entryFee: paymentRequired ? entryFee : 0,
         userId,
       }),
     });
@@ -95,58 +94,60 @@ export default function CreateHackathonPage() {
 
   if (role !== "admin") {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-red-400">
+      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-red-400 text-sm sm:text-base px-4">
         Unauthorized
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0b0f19] text-white px-6 py-20">
+    <main className="min-h-screen bg-[#0b0f19] text-white px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
       <div className="max-w-4xl mx-auto">
-
         {/* Heading */}
-        <h1 className="text-4xl font-extrabold mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-8 sm:mb-10 md:mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
           🚀 Create Hackathon
         </h1>
 
         <form
           onSubmit={handleCreate}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 space-y-8"
+          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 space-y-6 sm:space-y-8"
         >
-
           {/* Title */}
           <div>
-            <label className="block text-white/70 mb-2">Title</label>
+            <label className="block text-white/70 mb-2 text-sm sm:text-base">
+              Title
+            </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:outline-none"
+              className="w-full px-4 py-3 rounded-xl text-sm sm:text-base bg-white/10 border border-white/20 focus:outline-none"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-white/70 mb-2">Description</label>
+            <label className="block text-white/70 mb-2 text-sm sm:text-base">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
               required
-              className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 focus:outline-none"
+              className="w-full px-4 py-3 rounded-xl text-sm sm:text-base bg-white/10 border border-white/20 focus:outline-none"
             />
           </div>
 
-          {/* 🔥 NEW: PAYMENT SECTION (ADDED ONLY) */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <label className="block text-white/70 mb-4 text-lg">
+          {/* PAYMENT SECTION */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
+            <label className="block text-white/70 mb-3 sm:mb-4 text-base sm:text-lg">
               Payment Settings
             </label>
 
-            <div className="flex items-center gap-6 mb-4">
-              <label className="flex items-center gap-2">
+            <div className="flex items-center gap-4 sm:gap-6 mb-4">
+              <label className="flex items-center gap-2 text-sm sm:text-base">
                 <input
                   type="checkbox"
                   checked={paymentRequired}
@@ -162,7 +163,7 @@ export default function CreateHackathonPage() {
 
             {paymentRequired && (
               <div>
-                <label className="block text-white/70 mb-2">
+                <label className="block text-white/70 mb-2 text-sm sm:text-base">
                   Entry Fee (₹)
                 </label>
                 <input
@@ -172,16 +173,16 @@ export default function CreateHackathonPage() {
                     setEntryFee(Number(e.target.value))
                   }
                   min={0}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20"
+                  className="w-full px-4 py-3 rounded-xl text-sm sm:text-base bg-white/10 border border-white/20"
                 />
               </div>
             )}
           </div>
 
           {/* Team Size */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label className="block text-white/70 mb-2">
+              <label className="block text-white/70 mb-2 text-sm sm:text-base">
                 Team Size Min
               </label>
               <input
@@ -190,12 +191,12 @@ export default function CreateHackathonPage() {
                 onChange={(e) =>
                   setTeamSizeMin(Number(e.target.value))
                 }
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20"
+                className="w-full px-4 py-3 rounded-xl text-sm sm:text-base bg-white/10 border border-white/20"
               />
             </div>
 
             <div>
-              <label className="block text-white/70 mb-2">
+              <label className="block text-white/70 mb-2 text-sm sm:text-base">
                 Team Size Max
               </label>
               <input
@@ -204,13 +205,13 @@ export default function CreateHackathonPage() {
                 onChange={(e) =>
                   setTeamSizeMax(Number(e.target.value))
                 }
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20"
+                className="w-full px-4 py-3 rounded-xl text-sm sm:text-base bg-white/10 border border-white/20"
               />
             </div>
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <DateField
               label="Registration Start"
               value={registrationStart}
@@ -240,7 +241,7 @@ export default function CreateHackathonPage() {
 
           {/* Rules */}
           <div>
-            <label className="block text-white/70 mb-4">
+            <label className="block text-white/70 mb-3 sm:mb-4 text-sm sm:text-base">
               Rules
             </label>
 
@@ -248,7 +249,7 @@ export default function CreateHackathonPage() {
               {rules.map((rule, index) => (
                 <div
                   key={index}
-                  className="flex gap-3 items-center"
+                  className="flex flex-col sm:flex-row gap-3 sm:items-center"
                 >
                   <input
                     type="text"
@@ -256,14 +257,14 @@ export default function CreateHackathonPage() {
                     onChange={(e) =>
                       updateRule(index, e.target.value)
                     }
-                    className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20"
+                    className="flex-1 px-4 py-3 rounded-xl text-sm sm:text-base bg-white/10 border border-white/20"
                   />
 
                   {rules.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeRule(index)}
-                      className="text-red-400 hover:text-red-500"
+                      className="text-red-400 hover:text-red-500 self-end sm:self-auto"
                     >
                       ✕
                     </button>
@@ -285,7 +286,7 @@ export default function CreateHackathonPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-black font-semibold hover:scale-105 transition"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-black font-semibold text-sm sm:text-base hover:scale-105 transition"
           >
             {loading ? "Creating..." : "Create Hackathon"}
           </button>
@@ -294,8 +295,6 @@ export default function CreateHackathonPage() {
     </main>
   );
 }
-
-/* DATE FIELD COMPONENT */
 
 function DateField({
   label,
@@ -308,14 +307,14 @@ function DateField({
 }) {
   return (
     <div>
-      <label className="block text-white/70 mb-2">
+      <label className="block text-white/70 mb-2 text-sm sm:text-base">
         {label}
       </label>
       <input
         type="date"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20"
+        className="w-full px-4 py-3 rounded-xl text-sm sm:text-base bg-white/10 border border-white/20"
       />
     </div>
   );

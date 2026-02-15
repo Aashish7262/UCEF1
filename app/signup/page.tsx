@@ -87,28 +87,28 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 overflow-hidden">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12 overflow-hidden">
 
       {/* background aura */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
+        <div className="absolute -top-40 left-1/3 w-[450px] sm:w-[700px] h-[450px] sm:h-[700px] bg-purple-600/20 blur-[200px]" />
+        <div className="absolute bottom-0 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-blue-600/20 blur-[200px]" />
       </div>
 
-      <div className="relative w-full max-w-md rounded-3xl p-[2px]
+      <div className="relative w-full max-w-md sm:max-w-lg rounded-3xl p-[2px]
                       bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
 
-        <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-8">
+        <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8">
 
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-3xl font-extrabold
+            <h1 className="text-2xl sm:text-3xl font-extrabold
                            bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
                            bg-clip-text text-transparent">
               {step === "form" ? "Create Your Account" : "Verify OTP"}
             </h1>
 
-            <p className="mt-2 text-gray-400">
+            <p className="mt-2 text-sm sm:text-base text-gray-400 break-words">
               {step === "form"
                 ? "Join HackathonHub and start building 🚀"
                 : `OTP sent to ${email}`}
@@ -116,14 +116,14 @@ export default function SignupPage() {
           </div>
 
           {error && (
-            <div className="mt-6 bg-red-500/10 border border-red-500/30 text-red-300 text-sm rounded-xl px-4 py-3 text-center">
+            <div className="mt-5 sm:mt-6 bg-red-500/10 border border-red-500/30 text-red-300 text-sm rounded-xl px-4 py-3 text-center">
               {error}
             </div>
           )}
 
           {/* ================= FORM STEP ================= */}
           {step === "form" && (
-            <form onSubmit={handleSendOtp} className="mt-8 space-y-5">
+            <form onSubmit={handleSendOtp} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
 
               <input
                 type="text"
@@ -133,7 +133,7 @@ export default function SignupPage() {
                 required
                 className="w-full px-4 py-3 rounded-xl
                            bg-black/60 border border-white/20
-                           text-white
+                           text-white text-sm sm:text-base
                            focus:outline-none focus:border-purple-400
                            focus:ring-2 focus:ring-purple-500/30
                            transition"
@@ -147,7 +147,7 @@ export default function SignupPage() {
                 required
                 className="w-full px-4 py-3 rounded-xl
                            bg-black/60 border border-white/20
-                           text-white
+                           text-white text-sm sm:text-base
                            focus:outline-none focus:border-blue-400
                            focus:ring-2 focus:ring-blue-500/30
                            transition"
@@ -161,7 +161,7 @@ export default function SignupPage() {
                 required
                 className="w-full px-4 py-3 rounded-xl
                            bg-black/60 border border-white/20
-                           text-white
+                           text-white text-sm sm:text-base
                            focus:outline-none focus:border-purple-400
                            focus:ring-2 focus:ring-purple-500/30
                            transition"
@@ -172,7 +172,7 @@ export default function SignupPage() {
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl
                            bg-black/60 border border-white/20
-                           text-white
+                           text-white text-sm sm:text-base
                            focus:outline-none focus:border-purple-400
                            focus:ring-2 focus:ring-purple-500/30
                            transition"
@@ -184,7 +184,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold
+                className="w-full py-3 rounded-xl font-semibold text-sm sm:text-base
                            bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
                            text-black hover:brightness-110
                            transition-all duration-300
@@ -197,7 +197,7 @@ export default function SignupPage() {
 
           {/* ================= OTP STEP ================= */}
           {step === "otp" && (
-            <form onSubmit={handleVerifyOtpAndSignup} className="mt-8 space-y-5">
+            <form onSubmit={handleVerifyOtpAndSignup} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
 
               <input
                 type="text"
@@ -207,7 +207,7 @@ export default function SignupPage() {
                 required
                 className="w-full px-4 py-3 rounded-xl text-center tracking-widest
                            bg-black/60 border border-white/20
-                           text-white
+                           text-white text-sm sm:text-base
                            focus:outline-none focus:border-green-400
                            focus:ring-2 focus:ring-green-500/30
                            transition"
@@ -216,7 +216,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold
+                className="w-full py-3 rounded-xl font-semibold text-sm sm:text-base
                            bg-gradient-to-r from-green-500 to-emerald-500
                            text-black hover:brightness-110
                            transition-all duration-300
@@ -227,7 +227,7 @@ export default function SignupPage() {
             </form>
           )}
 
-          <p className="mt-6 text-sm text-center text-gray-400">
+          <p className="mt-5 sm:mt-6 text-xs sm:text-sm text-center text-gray-400">
             Already have an account?{" "}
             <Link href="/login" className="font-semibold text-blue-400 hover:underline">
               Login

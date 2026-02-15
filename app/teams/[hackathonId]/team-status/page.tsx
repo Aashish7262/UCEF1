@@ -67,36 +67,38 @@ export default function TeamStatusPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-white px-4 text-center">
         Loading Team Details...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0b0f19] text-white px-6 py-20">
-      <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10">
+    <main className="min-h-screen bg-[#0b0f19] text-white px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 lg:p-10">
 
-        <h1 className="text-3xl font-bold mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 break-words">
           Team: {teamName}
         </h1>
 
         {/* ===== MEMBERS ===== */}
-        <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-green-400">
+        <div className="mb-8 sm:mb-10">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-green-400">
             Team Members
           </h2>
           {members.length === 0 ? (
-            <p className="text-white/50">No members yet</p>
+            <p className="text-white/50 text-sm sm:text-base">No members yet</p>
           ) : (
             <div className="space-y-3">
               {members.map((member) => (
                 <div
                   key={member._id}
-                  className="bg-white/5 border border-white/10 p-4 rounded-xl"
+                  className="bg-white/5 border border-white/10 p-3 sm:p-4 rounded-xl"
                 >
-                  <div className="font-semibold">{member.name}</div>
-                  <div className="text-sm text-white/60">
+                  <div className="font-semibold text-sm sm:text-base break-words">
+                    {member.name}
+                  </div>
+                  <div className="text-xs sm:text-sm text-white/60 break-all">
                     {member.email}
                   </div>
                 </div>
@@ -106,17 +108,17 @@ export default function TeamStatusPage() {
         </div>
 
         {/* ===== PENDING ===== */}
-        <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-yellow-400">
+        <div className="mb-8 sm:mb-10">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-yellow-400">
             Pending Invitations
           </h2>
           {pendingInvites.length === 0 ? (
-            <p className="text-white/50">No pending invites</p>
+            <p className="text-white/50 text-sm sm:text-base">No pending invites</p>
           ) : (
             pendingInvites.map((invite) => (
               <div
                 key={invite._id}
-                className="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-xl mb-3"
+                className="bg-yellow-500/10 border border-yellow-500/30 p-3 sm:p-4 rounded-xl mb-3 text-sm sm:text-base break-all"
               >
                 {invite.to?.email} (Pending)
               </div>
@@ -125,17 +127,17 @@ export default function TeamStatusPage() {
         </div>
 
         {/* ===== ACCEPTED ===== */}
-        <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-green-400">
+        <div className="mb-8 sm:mb-10">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-green-400">
             Accepted Invitations
           </h2>
           {acceptedInvites.length === 0 ? (
-            <p className="text-white/50">No accepted invites</p>
+            <p className="text-white/50 text-sm sm:text-base">No accepted invites</p>
           ) : (
             acceptedInvites.map((invite) => (
               <div
                 key={invite._id}
-                className="bg-green-500/10 border border-green-500/30 p-4 rounded-xl mb-3"
+                className="bg-green-500/10 border border-green-500/30 p-3 sm:p-4 rounded-xl mb-3 text-sm sm:text-base break-all"
               >
                 {invite.to?.email} (Accepted)
               </div>
@@ -145,16 +147,16 @@ export default function TeamStatusPage() {
 
         {/* ===== REJECTED ===== */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-red-400">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-red-400">
             Rejected Invitations
           </h2>
           {rejectedInvites.length === 0 ? (
-            <p className="text-white/50">No rejected invites</p>
+            <p className="text-white/50 text-sm sm:text-base">No rejected invites</p>
           ) : (
             rejectedInvites.map((invite) => (
               <div
                 key={invite._id}
-                className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl mb-3"
+                className="bg-red-500/10 border border-red-500/30 p-3 sm:p-4 rounded-xl mb-3 text-sm sm:text-base break-all"
               >
                 {invite.to?.email} (Rejected)
               </div>
@@ -166,3 +168,4 @@ export default function TeamStatusPage() {
     </main>
   );
 }
+

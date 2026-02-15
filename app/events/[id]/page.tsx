@@ -89,12 +89,12 @@ const eventId = params.id;
   /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-20 overflow-hidden">
+    <div className="min-h-screen bg-black text-white px-4 sm:px-6 py-12 sm:py-20 overflow-hidden">
 
       {/* background aura */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/3 w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-purple-600/20 blur-[120px] md:blur-[200px]" />
+        <div className="absolute bottom-0 right-1/4 w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-blue-600/20 blur-[120px] md:blur-[200px]" />
       </div>
 
       <div className="relative max-w-4xl mx-auto">
@@ -103,19 +103,19 @@ const eventId = params.id;
         <div className="rounded-3xl p-[2px]
                         bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
 
-          <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-10">
+          <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8 md:p-10">
 
-            <h1 className="text-3xl md:text-4xl font-extrabold
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold
                            bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
-                           bg-clip-text text-transparent">
+                           bg-clip-text text-transparent break-words">
               {event.title}
             </h1>
 
-            <p className="mt-6 text-gray-400 leading-relaxed">
+            <p className="mt-4 sm:mt-6 text-gray-400 leading-relaxed text-sm sm:text-base">
               {event.description}
             </p>
 
-            <div className="mt-6 text-sm text-gray-400 space-y-2">
+            <div className="mt-5 sm:mt-6 text-xs sm:text-sm text-gray-400 space-y-2">
               <p>📅 Start: {new Date(event.eventDate).toDateString()}</p>
               <p>⏳ End: {new Date(event.endDate).toDateString()}</p>
               <p>
@@ -136,21 +136,21 @@ const eventId = params.id;
         </div>
 
         {/* RULES SECTION */}
-        <div className="mt-14 rounded-3xl p-[2px]
+        <div className="mt-10 sm:mt-14 rounded-3xl p-[2px]
                         bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
 
-          <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-8">
+          <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8">
 
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">
               Rules & Regulations
             </h2>
 
             {rules.length === 0 ? (
-              <p className="text-gray-400">
+              <p className="text-gray-400 text-sm sm:text-base">
                 Rules will be announced soon.
               </p>
             ) : (
-              <ul className="list-decimal ml-6 space-y-3 text-gray-300">
+              <ul className="list-decimal ml-4 sm:ml-6 space-y-2 sm:space-y-3 text-gray-300 text-sm sm:text-base">
                 {rules
                   .sort((a, b) => a.order - b.order)
                   .map((rule) => (
@@ -166,5 +166,6 @@ const eventId = params.id;
     </div>
   );
 }
+
 
 

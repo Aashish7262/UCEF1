@@ -62,24 +62,24 @@ export default function LoginPage() {
 
         {/* background aura */}
         <div className="pointer-events-none fixed inset-0">
-          <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
-          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
+          <div className="absolute -top-40 left-1/3 w-[300px] h-[300px] sm:w-[700px] sm:h-[700px] bg-purple-600/20 blur-[120px] sm:blur-[200px]" />
+          <div className="absolute bottom-0 right-1/4 w-[250px] h-[250px] sm:w-[600px] sm:h-[600px] bg-blue-600/20 blur-[120px] sm:blur-[200px]" />
         </div>
 
         <div className="relative w-full max-w-md rounded-3xl p-[2px]
                         bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
 
-          <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-8 text-center">
+          <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8 text-center">
 
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-white">
               Already Logged In
             </h1>
 
-            <p className="mt-3 text-gray-400">
+            <p className="mt-3 text-sm sm:text-base text-gray-400">
               Please logout first to continue with another account.
             </p>
 
-            <p className="mt-6 text-sm text-gray-500 animate-pulse">
+            <p className="mt-6 text-xs sm:text-sm text-gray-500 animate-pulse">
               Redirecting to home...
             </p>
 
@@ -96,24 +96,24 @@ export default function LoginPage() {
 
       {/* background aura */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 blur-[200px]" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/20 blur-[200px]" />
+        <div className="absolute -top-40 left-1/3 w-[300px] h-[300px] sm:w-[700px] sm:h-[700px] bg-purple-600/20 blur-[120px] sm:blur-[200px]" />
+        <div className="absolute bottom-0 right-1/4 w-[250px] h-[250px] sm:w-[600px] sm:h-[600px] bg-blue-600/20 blur-[120px] sm:blur-[200px]" />
       </div>
 
       <div className="relative w-full max-w-md rounded-3xl p-[2px]
                       bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
 
-        <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-8">
+        <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8">
 
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-3xl font-extrabold
+            <h1 className="text-2xl sm:text-3xl font-extrabold
                            bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
                            bg-clip-text text-transparent">
               Welcome Back
             </h1>
 
-            <p className="mt-2 text-gray-400">
+            <p className="mt-2 text-sm sm:text-base text-gray-400">
               Login to manage events & certificates
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function LoginPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="mt-8 space-y-5">
+          <form onSubmit={handleLogin} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -141,6 +141,7 @@ export default function LoginPage() {
                 className="w-full px-4 py-3 rounded-xl
                            bg-black/60 border border-white/20
                            text-white
+                           text-sm sm:text-base
                            focus:outline-none focus:border-purple-400
                            focus:ring-2 focus:ring-purple-500/30
                            transition"
@@ -160,6 +161,7 @@ export default function LoginPage() {
                 className="w-full px-4 py-3 rounded-xl
                            bg-black/60 border border-white/20
                            text-white
+                           text-sm sm:text-base
                            focus:outline-none focus:border-blue-400
                            focus:ring-2 focus:ring-blue-500/30
                            transition"
@@ -170,6 +172,7 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               className="w-full py-3 rounded-xl font-semibold
+                         text-sm sm:text-base
                          bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
                          text-black hover:brightness-110
                          transition-all duration-300
@@ -179,7 +182,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-center text-gray-400">
+          <p className="mt-6 text-xs sm:text-sm text-center text-gray-400">
             Don’t have an account?{" "}
             <a
               href="/signup"
@@ -194,5 +197,4 @@ export default function LoginPage() {
     </div>
   );
 }
-
 
