@@ -60,7 +60,6 @@ export default function AdminCertificatesPage() {
   }
 };
 
-
   useEffect(() => {
     fetchCertificates();
   }, [eventId, adminId]);
