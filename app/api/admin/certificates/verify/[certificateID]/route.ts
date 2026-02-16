@@ -6,11 +6,11 @@ import { User } from "@/models/User";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ certificateID: string }> }
+  // Use "certificateID" with a capital D to match the folder name
+  { params }: { params: Promise<{ certificateID: string }> } 
 ) {
   try {
-    // 1. Extract the ID with the correct casing 'certificateID' to match params
-    const { certificateID } = await params;
+    const { certificateID } = await params; // Extract with capital D
 
     if (!certificateID) {
       return NextResponse.json(
@@ -21,13 +21,12 @@ export async function GET(
 
     await connectDB();
 
-    // 2. Query the database using the extracted certificateID.
-    // Ensure 'certificateId' matches the field name in your MongoDB Certificate model.
+    // Query using the extracted ID, but match your Schema field (likely certificateId)
     const certificate = await Certificate.findOne({ certificateId: certificateID })
       .populate("student", "name email")
       .populate("event", "title");
 
-    // ❌ Certificate not found = INVALID
+    // ... rest of your code
     if (!certificate) {
       return NextResponse.json(
         {
