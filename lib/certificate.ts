@@ -97,11 +97,17 @@ export async function generateCertificate({
   });
 
   // 🔥 QR CODE (Verification Link)
-  const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify/${certificateId}`;
-  const qrImage = await QRCode.toDataURL(verifyUrl);
 
-  const qrImageBytes = await fetch(qrImage).then((res) => res.arrayBuffer());
-  const qrEmbed = await pdfDoc.embedPng(qrImageBytes);
+  // 🔥 QR CODE (Server-safe - NO fetch)
+const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify/${certificateId}`;
+const qrDataUrl = await QRCode.toDataURL(verifyUrl);
+
+// Convert base64 → buffer (safe for server)
+const base64Data = qrDataUrl.split(",")[1];
+const qrBuffer = Buffer.from(base64Data, "base64");
+
+const qrEmbed = await pdfDoc.embedPng(qrBuffer);
+
 
   page.drawImage(qrEmbed, {
     x: 50,

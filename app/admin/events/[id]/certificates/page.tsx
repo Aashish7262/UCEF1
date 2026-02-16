@@ -32,32 +32,34 @@ export default function AdminCertificatesPage() {
       ? localStorage.getItem("userId")
       : null;
 
-  /* ================= FETCH CERTIFICATES ================= */
   const fetchCertificates = async () => {
-    if (!eventId || !adminId) return;
+  if (!eventId || !adminId) return;
 
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      const res = await fetch(
-        `/api/certificates?eventId=${eventId}&adminId=${adminId}`
-      );
+    const res = await fetch(
+      `/api/certificates?eventId=${eventId}&adminId=${adminId}`
+    );
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to fetch certificates");
-      }
-
-      setCertificates(data.certificates || []);
-    } catch (err: any) {
-      console.error("Fetch Certificates Error:", err);
-      setError(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+    // 🔥 CRITICAL FIX: handle non-JSON responses (like Vercel HTML errors)
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("API ERROR RESPONSE:", text);
+      throw new Error("Failed to fetch certificates (API error)");
     }
-  };
+
+    const data = await res.json(); // safe now
+    setCertificates(data.certificates || []);
+  } catch (err: any) {
+    console.error("Fetch Certificates Error:", err);
+    setError(err.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchCertificates();
