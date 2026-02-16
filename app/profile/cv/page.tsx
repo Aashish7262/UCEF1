@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -174,19 +171,19 @@ window.URL.revokeObjectURL(url);
 
 
 return (
-<div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
+<div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8">
 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
 
 {/* ================= LEFT PANEL ================= */}
-<div className="bg-white rounded-2xl shadow-lg p-6 relative">
+<div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 relative">
 
 {/* TABS */}
-<div className="flex gap-3 mb-6">
+<div className="flex flex-wrap gap-2 md:gap-3 mb-6">
 {["personal", "skills", "projects", "experience"].map((s) => (
 <button
 key={s}
 onClick={() => setStep(s as any)}
-className={`px-5 py-2 rounded-full text-sm font-semibold transition
+className={`flex-1 min-w-[100px] px-3 md:px-5 py-2 rounded-full text-xs md:text-sm font-semibold transition
 ${step === s ? `${accentStyle.bg} text-white` : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
 >
 {s.toUpperCase()}
@@ -195,12 +192,12 @@ ${step === s ? `${accentStyle.bg} text-white` : "bg-gray-100 text-gray-700 hover
 </div>
 
 {/* ACCENT PICKER */}
-<div className="flex gap-3 mb-6">
+<div className="flex gap-3 mb-6 overflow-x-auto pb-2">
 {Object.keys(accentMap).map((c) => (
 <div
 key={c}
 onClick={() => setAccent(c as any)}
-className={`w-7 h-7 rounded-full cursor-pointer ${accentMap[c].bg}
+className={`w-7 h-7 rounded-full cursor-pointer flex-shrink-0 ${accentMap[c].bg}
 ${accent === c ? "ring-2 ring-black ring-offset-2" : ""}`}
 />
 ))}
@@ -209,12 +206,12 @@ ${accent === c ? "ring-2 ring-black ring-offset-2" : ""}`}
 {/* PERSONAL */}
 {step === "personal" && (
 <>
-<div className="mb-6 flex items-center gap-4">
+<div className="mb-6 flex flex-col sm:items-center sm:flex-row gap-4">
 <div className="w-24 h-24 rounded-full border overflow-hidden bg-gray-200">
 {photo ? <img src={photo} className="w-full h-full object-cover" /> :
 <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">Photo</div>}
 </div>
-<label className="cursor-pointer px-4 py-2 rounded-lg bg-gray-900 text-white text-sm">
+<label className="cursor-pointer px-4 py-2 rounded-lg bg-gray-900 text-white text-sm text-center">
 Upload Photo
 <input type="file" accept="image/*" hidden
 onChange={(e) => {
@@ -372,7 +369,7 @@ setAchInput("");
 <>
 <button
 onClick={() => setProjects([...projects, { title: "", description: "", url: "" }])}
-className="mb-4 px-4 py-2 rounded-lg bg-green-600 text-white"
+className="mb-4 w-full sm:w-auto px-4 py-2 rounded-lg bg-green-600 text-white"
 >
 + Add Project
 </button>
@@ -387,7 +384,7 @@ set={(v: string) => setProjects(projects.map((x, idx) => idx === i ? { ...x, url
 set={(v: string) => setProjects(projects.map((x, idx) => idx === i ? { ...x, description: v } : x))} />
 <button
 onClick={() => generateProjectDescription(i)}
-className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm"
+className="mt-2 w-full sm:w-auto px-3 py-1 bg-blue-600 text-white rounded text-sm"
 >
 ✨ Generate Description (AI)
 </button>
@@ -402,7 +399,7 @@ className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm"
 <>
 <button
 onClick={() => setExperience([...experience, { company: "", role: "", duration: "", description: "" }])}
-className="mb-4 px-4 py-2 rounded-lg bg-green-600 text-white"
+className="mb-4 w-full sm:w-auto px-4 py-2 rounded-lg bg-green-600 text-white"
 >
 + Add Experience
 </button>
@@ -420,7 +417,7 @@ set={(v: string) => setExperience(experience.map((x, idx) => idx === i ? { ...x,
 
 <button
 onClick={() => generateExperienceDescription(i)}
-className="mt-2 px-3 py-1 bg-purple-600 text-white rounded text-sm"
+className="mt-2 w-full sm:w-auto px-3 py-1 bg-purple-600 text-white rounded text-sm"
 >
 ✨ Generate Description (AI)
 </button>
@@ -432,21 +429,23 @@ className="mt-2 px-3 py-1 bg-purple-600 text-white rounded text-sm"
 </div>
 
 {/* ================= RIGHT PREVIEW ================= */}
-<div className="bg-white rounded-2xl shadow-lg p-8">
-<div className="flex items-center gap-4">
+<div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 h-fit lg:sticky lg:top-8">
+<div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
 {photo && <img src={photo} className="w-20 h-20 rounded-full object-cover border" />}
 <div>
-<h1 className={`text-3xl font-bold ${accentStyle.text}`}>{name}</h1>
+<h1 className={`text-2xl md:text-3xl font-bold ${accentStyle.text}`}>{name}</h1>
 <p className="text-lg text-gray-600">{title}</p>
 </div>
 </div>
 
-<p className="text-sm text-gray-500 mt-1">{email} • {phone} • {location}</p>
+<p className="text-sm text-gray-500 mt-2 text-center sm:text-left break-words">
+{email} {phone && `• ${phone}`} {location && `• ${location}`}
+</p>
 
 
 
 {/* 🔗 Coding Profiles */}
-<div className="flex flex-wrap gap-4 text-sm text-blue-600 mt-2">
+<div className="flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-blue-600 mt-2">
 {github && (
 <a
 href={github}
@@ -501,7 +500,7 @@ LinkedIn
 {projects.map((p, i) => (
 <div key={i} className="mb-3">
 <strong>{p.title}</strong>
-{p.url && <div><a href={p.url} className="text-blue-600 text-sm" target="_blank">{p.url}</a></div>}
+{p.url && <div className="truncate"><a href={p.url} className="text-blue-600 text-sm" target="_blank">{p.url}</a></div>}
 <p className="text-sm">{p.description}</p>
 </div>
 ))}
