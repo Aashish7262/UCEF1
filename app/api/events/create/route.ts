@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { title, description, eventDate, endDate, userId } =
       await req.json();
 
-    // 🔹 Step 1: Basic validation
+    
     if (!title || !description || !eventDate || !endDate || !userId) {
       return NextResponse.json(
         { message: "All fields are required" },

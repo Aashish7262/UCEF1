@@ -4,7 +4,7 @@ import { Event } from "@/models/Event";
 import { User } from "@/models/User";
 
 export async function PATCH(
-  req: Request,
+ req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
