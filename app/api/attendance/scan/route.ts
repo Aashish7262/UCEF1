@@ -4,6 +4,9 @@ import { Event } from "@/models/Event";
 import { RoleAssignment } from "@/models/RoleAssignment";
 import { Attendance } from "@/models/Attendance";
 import { User } from "@/models/User";
+import { generateCertificate } from "@/lib/certificate";
+import { transporter } from "@/lib/mailer";
+
 
 export async function POST(req: Request) {
   try {
@@ -90,19 +93,59 @@ export async function POST(req: Request) {
     }
 
     if (attendanceResults.length === 0) {
-      return NextResponse.json(
-        { message: "Attendance already marked for all approved roles" },
-        { status: 200 }
-      );
-    }
+  return NextResponse.json(
+    { message: "Attendance already marked for all approved roles" },
+    { status: 200 }
+  );
+}
 
-    return NextResponse.json(
-      {
-        message: "Attendance marked successfully",
-        rolesMarked: attendanceResults.map((a) => a.role),
-      },
-      { status: 201 }
-    );
+// 🎓 ================= SEND ROLE-BASED CERTIFICATES =================
+try {
+  const eventDate = new Date(event.endDate).toDateString();
+
+  for (const assignment of approvedAssignments) {
+    // Generate certificate PDF per role
+    const pdfBytes = await generateCertificate({
+      studentName: student.name,
+      eventTitle: event.title,
+      role: assignment.role,
+      date: eventDate,
+    });
+
+    // Send email with certificate attachment
+    await transporter.sendMail({
+      from: `"HackathonHub" <${process.env.EMAIL_USER}>`,
+      to: student.email,
+      subject: `🎓 Certificate for ${event.title} - ${assignment.role}`,
+      text: `Congratulations ${student.name}!
+
+You have successfully marked attendance for the role: ${assignment.role} in ${event.title}.
+
+Please find your certificate attached.
+
+Regards,
+HackathonHub Team 🚀`,
+      attachments: [
+        {
+          filename: `Certificate-${assignment.role}.pdf`,
+          content: Buffer.from(pdfBytes),
+        },
+      ],
+    });
+  }
+} catch (mailError) {
+  console.error("CERTIFICATE EMAIL ERROR:", mailError);
+  // We do NOT fail attendance if email fails (very important production practice)
+}
+
+return NextResponse.json(
+  {
+    message: "Attendance marked successfully & certificates emailed",
+    rolesMarked: attendanceResults.map((a) => a.role),
+  },
+  { status: 201 }
+);
+
   } catch (error) {
     console.error("SCAN ATTENDANCE ERROR:", error);
     return NextResponse.json(
