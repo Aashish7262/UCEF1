@@ -81,7 +81,7 @@ export default function HomePage() {
 
                 {role === "admin" && (
                   <Link
-                    href="/admin/create-event"
+                    href="/profile"
                     className="w-full sm:w-auto text-center px-6 py-3 sm:px-8 sm:py-4 rounded-2xl border border-white/20
                                text-white hover:border-white
                                hover:bg-white/5 transition-all duration-300"

@@ -17,6 +17,7 @@ export async function POST(req: Request) {
 
     const user = await User.findOne({ email });
 
+    // Keep SAME auth logic (do not break existing users)
     if (!user || user.password !== password) {
       return NextResponse.json(
         { message: "Invalid credentials" },
@@ -24,13 +25,18 @@ export async function POST(req: Request) {
       );
     }
 
+    // Extended response for new architecture (roles, dept, branch)
     return NextResponse.json({
       message: "Login successful",
       userId: user._id,
       role: user.role,
       name: user.name,
+      email: user.email,
+      department: user.department || "",
+      branch: user.branch || "",
     });
   } catch (error) {
+    console.error("LOGIN ERROR:", error);
     return NextResponse.json(
       { message: "Login failed" },
       { status: 500 }

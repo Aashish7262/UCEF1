@@ -14,6 +14,10 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("student");
 
+  // 🔥 NEW FIELDS (Required for new architecture)
+  const [department, setDepartment] = useState("");
+  const [branch, setBranch] = useState("");
+
   const [otp, setOtp] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -22,6 +26,13 @@ export default function SignupPage() {
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Basic validation for new fields
+    if (!department || !branch) {
+      setError("Department and Branch are required");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -52,6 +63,7 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
+      // Step 1: Verify OTP
       const verifyRes = await fetch("/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,10 +77,18 @@ export default function SignupPage() {
         return;
       }
 
+      // Step 2: Signup with NEW architecture fields
       const signupRes = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role,
+          department, // 🔥 NEW
+          branch,     // 🔥 NEW
+        }),
       });
 
       const signupData = await signupRes.json();
@@ -88,23 +108,17 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12 overflow-hidden">
-
       {/* background aura */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 left-1/3 w-[450px] sm:w-[700px] h-[450px] sm:h-[700px] bg-purple-600/20 blur-[200px]" />
         <div className="absolute bottom-0 right-1/4 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-blue-600/20 blur-[200px]" />
       </div>
 
-      <div className="relative w-full max-w-md sm:max-w-lg rounded-3xl p-[2px]
-                      bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
-
+      <div className="relative w-full max-w-md sm:max-w-lg rounded-3xl p-[2px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
         <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8">
-
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-extrabold
-                           bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
-                           bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               {step === "form" ? "Create Your Account" : "Verify OTP"}
             </h1>
 
@@ -123,20 +137,17 @@ export default function SignupPage() {
 
           {/* ================= FORM STEP ================= */}
           {step === "form" && (
-            <form onSubmit={handleSendOtp} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-
+            <form
+              onSubmit={handleSendOtp}
+              className="mt-6 sm:mt-8 space-y-4 sm:space-y-5"
+            >
               <input
                 type="text"
                 placeholder="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl
-                           bg-black/60 border border-white/20
-                           text-white text-sm sm:text-base
-                           focus:outline-none focus:border-purple-400
-                           focus:ring-2 focus:ring-purple-500/30
-                           transition"
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 transition"
               />
 
               <input
@@ -145,12 +156,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl
-                           bg-black/60 border border-white/20
-                           text-white text-sm sm:text-base
-                           focus:outline-none focus:border-blue-400
-                           focus:ring-2 focus:ring-blue-500/30
-                           transition"
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 transition"
               />
 
               <input
@@ -159,23 +165,33 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl
-                           bg-black/60 border border-white/20
-                           text-white text-sm sm:text-base
-                           focus:outline-none focus:border-purple-400
-                           focus:ring-2 focus:ring-purple-500/30
-                           transition"
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 transition"
+              />
+
+              {/* 🔥 NEW: Department */}
+              <input
+                type="text"
+                placeholder="Department (e.g. Computer Science)"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-500/30 transition"
+              />
+
+              {/* 🔥 NEW: Branch */}
+              <input
+                type="text"
+                placeholder="Branch (e.g. AI, IT, CSE)"
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 transition"
               />
 
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl
-                           bg-black/60 border border-white/20
-                           text-white text-sm sm:text-base
-                           focus:outline-none focus:border-purple-400
-                           focus:ring-2 focus:ring-purple-500/30
-                           transition"
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 transition"
               >
                 <option value="student">Student</option>
                 <option value="admin">Admin</option>
@@ -184,11 +200,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold text-sm sm:text-base
-                           bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
-                           text-black hover:brightness-110
-                           transition-all duration-300
-                           disabled:opacity-60 shadow-lg"
+                className="w-full py-3 rounded-xl font-semibold text-sm sm:text-base bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-black hover:brightness-110 transition-all duration-300 disabled:opacity-60 shadow-lg"
               >
                 {loading ? "Sending OTP..." : "Create Account"}
               </button>
@@ -197,30 +209,23 @@ export default function SignupPage() {
 
           {/* ================= OTP STEP ================= */}
           {step === "otp" && (
-            <form onSubmit={handleVerifyOtpAndSignup} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-
+            <form
+              onSubmit={handleVerifyOtpAndSignup}
+              className="mt-6 sm:mt-8 space-y-4 sm:space-y-5"
+            >
               <input
                 type="text"
                 placeholder="Enter 6-digit OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl text-center tracking-widest
-                           bg-black/60 border border-white/20
-                           text-white text-sm sm:text-base
-                           focus:outline-none focus:border-green-400
-                           focus:ring-2 focus:ring-green-500/30
-                           transition"
+                className="w-full px-4 py-3 rounded-xl text-center tracking-widest bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-500/30 transition"
               />
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold text-sm sm:text-base
-                           bg-gradient-to-r from-green-500 to-emerald-500
-                           text-black hover:brightness-110
-                           transition-all duration-300
-                           disabled:opacity-60 shadow-lg"
+                className="w-full py-3 rounded-xl font-semibold text-sm sm:text-base bg-gradient-to-r from-green-500 to-emerald-500 text-black hover:brightness-110 transition-all duration-300 disabled:opacity-60 shadow-lg"
               >
                 {loading ? "Verifying..." : "Verify & Create Account"}
               </button>
@@ -229,16 +234,16 @@ export default function SignupPage() {
 
           <p className="mt-5 sm:mt-6 text-xs sm:text-sm text-center text-gray-400">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-blue-400 hover:underline">
+            <Link
+              href="/login"
+              className="font-semibold text-blue-400 hover:underline"
+            >
               Login
             </Link>
           </p>
-
         </div>
       </div>
     </div>
   );
 }
-
-
 

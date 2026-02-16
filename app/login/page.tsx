@@ -42,12 +42,30 @@ export default function LoginPage() {
         return;
       }
 
+      // 🔥 Updated for new architecture (CRITICAL)
       localStorage.setItem("userId", data.userId);
       localStorage.setItem("role", data.role);
       localStorage.setItem("name", data.name);
+      localStorage.setItem("email", data.email || "");
+      localStorage.setItem("department", data.department || "");
+      localStorage.setItem("branch", data.branch || "");
+
+      // Optional: store full user object for future dashboards
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          userId: data.userId,
+          role: data.role,
+          name: data.name,
+          email: data.email,
+          department: data.department,
+          branch: data.branch,
+        })
+      );
 
       router.push("/");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -59,18 +77,14 @@ export default function LoginPage() {
   if (alreadyLoggedIn) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 overflow-hidden">
-
         {/* background aura */}
         <div className="pointer-events-none fixed inset-0">
           <div className="absolute -top-40 left-1/3 w-[300px] h-[300px] sm:w-[700px] sm:h-[700px] bg-purple-600/20 blur-[120px] sm:blur-[200px]" />
           <div className="absolute bottom-0 right-1/4 w-[250px] h-[250px] sm:w-[600px] sm:h-[600px] bg-blue-600/20 blur-[120px] sm:blur-[200px]" />
         </div>
 
-        <div className="relative w-full max-w-md rounded-3xl p-[2px]
-                        bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
-
+        <div className="relative w-full max-w-md rounded-3xl p-[2px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
           <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8 text-center">
-
             <h1 className="text-xl sm:text-2xl font-bold text-white">
               Already Logged In
             </h1>
@@ -82,7 +96,6 @@ export default function LoginPage() {
             <p className="mt-6 text-xs sm:text-sm text-gray-500 animate-pulse">
               Redirecting to home...
             </p>
-
           </div>
         </div>
       </div>
@@ -93,28 +106,22 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 overflow-hidden">
-
       {/* background aura */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 left-1/3 w-[300px] h-[300px] sm:w-[700px] sm:h-[700px] bg-purple-600/20 blur-[120px] sm:blur-[200px]" />
         <div className="absolute bottom-0 right-1/4 w-[250px] h-[250px] sm:w-[600px] sm:h-[600px] bg-blue-600/20 blur-[120px] sm:blur-[200px]" />
       </div>
 
-      <div className="relative w-full max-w-md rounded-3xl p-[2px]
-                      bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
-
+      <div className="relative w-full max-w-md rounded-3xl p-[2px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
         <div className="rounded-3xl bg-black/70 backdrop-blur-xl p-6 sm:p-8">
-
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-extrabold
-                           bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400
-                           bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               Welcome Back
             </h1>
 
             <p className="mt-2 text-sm sm:text-base text-gray-400">
-              Login to manage events & certificates
+              Login to manage events, roles & certificates
             </p>
           </div>
 
@@ -126,8 +133,10 @@ export default function LoginPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-
+          <form
+            onSubmit={handleLogin}
+            className="mt-6 sm:mt-8 space-y-4 sm:space-y-5"
+          >
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Email Address
@@ -138,13 +147,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl
-                           bg-black/60 border border-white/20
-                           text-white
-                           text-sm sm:text-base
-                           focus:outline-none focus:border-purple-400
-                           focus:ring-2 focus:ring-purple-500/30
-                           transition"
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 transition"
               />
             </div>
 
@@ -158,25 +161,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-xl
-                           bg-black/60 border border-white/20
-                           text-white
-                           text-sm sm:text-base
-                           focus:outline-none focus:border-blue-400
-                           focus:ring-2 focus:ring-blue-500/30
-                           transition"
+                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/30 transition"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold
-                         text-sm sm:text-base
-                         bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
-                         text-black hover:brightness-110
-                         transition-all duration-300
-                         disabled:opacity-60 shadow-lg"
+              className="w-full py-3 rounded-xl font-semibold text-sm sm:text-base bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-black hover:brightness-110 transition-all duration-300 disabled:opacity-60 shadow-lg"
             >
               {loading ? "Logging in..." : "Login"}
             </button>
@@ -191,10 +183,8 @@ export default function LoginPage() {
               Create one
             </a>
           </p>
-
         </div>
       </div>
     </div>
   );
 }
-

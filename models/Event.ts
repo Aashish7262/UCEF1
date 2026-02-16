@@ -18,7 +18,6 @@ const EventSchema = new Schema(
       required: true,
     },
 
-   
     endDate: {
       type: Date,
       required: true,
@@ -26,28 +25,28 @@ const EventSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["draft", "live"],
+      enum: ["draft", "live", "completed"],
       default: "draft",
     },
 
-    createdBy: {
+    // Admin = Organizer (CRITICAL CHANGE)
+    organizer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
+    // QR control (for 2 min before end logic)
+    qrEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
 
-
-EventSchema.virtual("isExpired").get(function () {
-  if (!this.endDate) return false;
-  return new Date() > this.endDate;
-});
-
 export const Event = models.Event || mongoose.model("Event", EventSchema);
+
 

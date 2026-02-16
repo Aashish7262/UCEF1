@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { title, description, eventDate, endDate, userId } =
       await req.json();
 
-   
+    // 🔹 Step 1: Basic validation
     if (!title || !description || !eventDate || !endDate || !userId) {
       return NextResponse.json(
         { message: "All fields are required" },
@@ -19,16 +19,23 @@ export async function POST(req: Request) {
     const start = new Date(eventDate);
     const end = new Date(endDate);
 
-    if (end < start) {
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return NextResponse.json(
-        { message: "End date must be after event date" },
+        { message: "Invalid date format" },
+        { status: 400 }
+      );
+    }
+
+    if (end <= start) {
+      return NextResponse.json(
+        { message: "End date must be after event start date" },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    
+    // 🔹 Step 2: Verify organizer (Admin only)
     const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json(
@@ -37,37 +44,38 @@ export async function POST(req: Request) {
       );
     }
 
-   
     if (user.role !== "admin") {
       return NextResponse.json(
-        { message: "Only admin can create events" },
+        { message: "Only admin (organizer) can create events" },
         { status: 403 }
       );
     }
 
-    
+    // 🔥 Step 3: Create event (MATCHES NEW MODEL EXACTLY)
     const event = await Event.create({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       eventDate: start,
       endDate: end,
-      status: "draft",
-      createdBy: user._id,
+      status: "draft",          // required by workflow
+      organizer: user._id,      // 🔥 NOT createdBy (fixed)
+      qrEnabled: false,         // for future QR feature
     });
 
     return NextResponse.json(
       {
-        message: "Event created successfully",
+        message: "Event created successfully (Draft)",
         event,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error(error);
+    console.error("CREATE EVENT ERROR:", error);
     return NextResponse.json(
       { message: "Failed to create event" },
       { status: 500 }
     );
   }
 }
+
 

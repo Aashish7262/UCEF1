@@ -10,62 +10,39 @@ interface EventType {
   description: string;
   eventDate: string;
   endDate: string;
-  status: "draft" | "live";
-  createdBy: string;
-}
-
-type ParticipationStatus = "registered" | "attended";
-
-interface ParticipationMap {
-  [eventId: string]: {
-    status: ParticipationStatus;
-    certificateId?: string;
-  };
+  status: "draft" | "live" | "completed";
+  organizer: string; // NEW ARCHITECTURE
 }
 
 export default function EventsPage() {
   const router = useRouter();
 
   const [events, setEvents] = useState<EventType[]>([]);
-  const [participations, setParticipations] =
-    useState<ParticipationMap>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const role =
     typeof window !== "undefined" ? localStorage.getItem("role") : null;
+
   const userId =
     typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
-  /* ================= LOAD EVENTS + PARTICIPATIONS ================= */
+  /* ================= LOAD EVENTS ================= */
   useEffect(() => {
     if (!role) return;
 
-    const loadData = async () => {
+    const loadEvents = async () => {
       try {
         setLoading(true);
 
-        const eventsRes = await fetch(`/api/events?role=${role}`);
-        const eventsData = await eventsRes.json();
-        if (!eventsRes.ok) throw new Error(eventsData.message);
-        setEvents(eventsData.events || []);
+        const res = await fetch(`/api/events?role=${role}`);
+        const data = await res.json();
 
-        if (role === "student" && userId) {
-          const pRes = await fetch(
-            `/api/participation?studentId=${userId}`
-          );
-          const pData = await pRes.json();
-          if (!pRes.ok) throw new Error(pData.message);
-
-          const map: ParticipationMap = {};
-          pData.participations.forEach((p: any) => {
-            map[p.event.toString()] = {
-              status: p.status,
-              certificateId: p.certificate || undefined,
-            };
-          });
-          setParticipations(map);
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch events");
         }
+
+        setEvents(data.events || []);
       } catch (err: any) {
         setError(err.message || "Something went wrong");
       } finally {
@@ -73,68 +50,34 @@ export default function EventsPage() {
       }
     };
 
-    loadData();
-  }, [role, userId]);
+    loadEvents();
+  }, [role]);
 
-  /* ================= PARTICIPATE ================= */
-  const handleParticipate = async (eventId: string) => {
-    if (!userId) return;
-
-    const res = await fetch("/api/participation", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId, studentId: userId }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message);
-      return;
-    }
-
-    setParticipations((prev) => ({
-      ...prev,
-      [eventId]: { status: "registered" },
-    }));
-  };
-
-  /* ================= GENERATE CERTIFICATE ================= */
-  const handleGenerateCertificate = async (eventId: string) => {
-    if (!userId) return;
-
-    const res = await fetch("/api/certificates/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId, studentId: userId }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message);
-      return;
-    }
-
-    router.push(`/certificates/${data.certificateId}`);
-  };
-
-  /* ================= ADMIN: MAKE EVENT LIVE ================= */
+  /* ================= MAKE EVENT LIVE (ORGANIZER ONLY) ================= */
   const makeEventLive = async (eventId: string) => {
     if (!userId) return;
 
-    const res = await fetch(`/api/events/${eventId}/live`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
-    });
+    try {
+      const res = await fetch(`/api/events/${eventId}/live`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
 
-    if (!res.ok) {
-      alert("Failed to make event live");
-      return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to make event live");
+        return;
+      }
+
+      // Refresh events list
+      const updated = await fetch(`/api/events?role=${role}`);
+      const updatedData = await updated.json();
+      setEvents(updatedData.events || []);
+    } catch {
+      alert("Something went wrong");
     }
-
-    const updated = await fetch(`/api/events?role=${role}`);
-    const data = await updated.json();
-    setEvents(data.events || []);
   };
 
   if (loading) {
@@ -147,7 +90,6 @@ export default function EventsPage() {
 
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
-
       {/* background aura */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/3 w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-purple-600/20 blur-[120px] md:blur-[200px]" />
@@ -155,7 +97,6 @@ export default function EventsPage() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10 sm:mb-16">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold
@@ -187,26 +128,21 @@ export default function EventsPage() {
         {/* EVENTS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
           {events.map((event) => {
-            const participation = participations[event._id];
-
             const now = new Date();
             const startDate = new Date(event.eventDate);
             const endDate = new Date(event.endDate);
 
-            const isWithinDateRange =
-              now >= startDate && now <= endDate;
             const isExpired = now > endDate;
+            const isOrganizer = event.organizer === userId;
 
             return (
               <div
                 key={event._id}
                 className="group relative rounded-3xl p-[2px]
                            bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500
-                           hover:scale-[1.02] sm:hover:scale-[1.03] transition-all duration-300"
+                           hover:scale-[1.02] transition-all duration-300"
               >
                 <div className="relative rounded-3xl bg-black/70 backdrop-blur-xl p-5 sm:p-6 h-full overflow-hidden">
-
-                  {/* glow */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100
                                   transition duration-300
                                   bg-gradient-to-br from-purple-500/30 to-blue-500/30
@@ -230,14 +166,14 @@ export default function EventsPage() {
                     <div className="mt-3 sm:mt-4">
                       {isExpired ? (
                         <span className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-300">
-                          EXPIRED
+                          COMPLETED
                         </span>
                       ) : event.status === "live" ? (
                         <span className="px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-300">
                           LIVE
                         </span>
                       ) : (
-                        <span className="px-3 py-1 rounded-full text-xs bg-white/20 text-white/70">
+                        <span className="px-3 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300">
                           DRAFT
                         </span>
                       )}
@@ -255,88 +191,56 @@ export default function EventsPage() {
                         View Details
                       </Link>
 
-                      {/* ADMIN */}
-                      {role === "admin" &&
-                        event.createdBy === userId && (
-                          <>
-                            {event.status === "draft" &&
-                              isWithinDateRange && (
-                                <button
-                                  onClick={() =>
-                                    makeEventLive(event._id)
-                                  }
-                                  className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
-                                             bg-green-500/80 hover:bg-green-600
-                                             transition-all"
-                                >
-                                  Make Live
-                                </button>
-                              )}
+                      {/* ORGANIZER CONTROLS */}
+                      {role === "admin" && isOrganizer && (
+                        <>
+                          {event.status === "draft" && !isExpired && (
+                            <button
+                              onClick={() => makeEventLive(event._id)}
+                              className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
+                                         bg-green-500 hover:bg-green-600
+                                         transition-all font-semibold"
+                            >
+                              Make Live 🚀
+                            </button>
+                          )}
 
-                            {event.status === "live" && (
-                              <Link
-                                href={`/admin/events/${event._id}/participants`}
-                                className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
-                                           border border-white/20
-                                           hover:border-white hover:bg-white/10
-                                           transition-all"
-                              >
-                                Participants
-                              </Link>
-                            )}
-                          </>
-                        )}
+                          {event.status === "live" && (
+                            <Link
+                              href={`/admin/events/${event._id}/roles`}
+                              className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
+                                         border border-white/20
+                                         hover:border-white hover:bg-white/10
+                                         transition-all"
+                            >
+                              Manage Roles
+                            </Link>
+                          )}
+                        </>
+                      )}
 
-                      {/* STUDENT */}
-                      {role === "student" &&
-                        event.status === "live" &&
-                        isWithinDateRange && (
-                          <>
-                            {!participation && (
-                              <button
-                                onClick={() =>
-                                  handleParticipate(event._id)
-                                }
-                                className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
-                                           bg-blue-500 hover:bg-blue-600
-                                           transition-all"
-                              >
-                                Participate
-                              </button>
-                            )}
+                      {/* STUDENT FLOW (NEW ARCHITECTURE) */}
+                      {role === "student" && !isExpired && (
+                        <>
+                          {event.status === "draft" && (
+                            <span className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm bg-white/20">
+                              Roles Coming Soon
+                            </span>
+                          )}
+{/* STUDENT: APPLY FOR ROLES (NEW ROLE-BASED SYSTEM) */}
+{role === "student" && event.status === "live" && !isExpired && (
+  <Link
+    href={`/events/${event._id}/roles`}
+    className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
+               bg-blue-500 hover:bg-blue-600
+               transition-all"
+  >
+    Apply for Roles
+  </Link>
+)}
 
-                            {participation?.status === "registered" && (
-                              <span className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm bg-white/20">
-                                Registered ✔
-                              </span>
-                            )}
-
-                            {participation?.status === "attended" &&
-                              !participation.certificateId && (
-                                <button
-                                  onClick={() =>
-                                    handleGenerateCertificate(event._id)
-                                  }
-                                  className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
-                                             bg-green-500 hover:bg-green-600
-                                             transition-all"
-                                >
-                                  Generate Certificate
-                                </button>
-                              )}
-
-                            {participation?.certificateId && (
-                              <Link
-                                href={`/certificates/${participation.certificateId}`}
-                                className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
-                                           bg-purple-500 hover:bg-purple-600
-                                           transition-all"
-                              >
-                                Download Certificate
-                              </Link>
-                            )}
-                          </>
-                        )}
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -348,6 +252,7 @@ export default function EventsPage() {
     </main>
   );
 }
+
 
 
 

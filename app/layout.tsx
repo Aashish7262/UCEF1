@@ -27,14 +27,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-  className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
->
-
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
+      >
+        {/* GLOBAL THEME WRAPPER (SAFE - NO LOGIC IMPACT) */}
+        <div
+          className="flex flex-col min-h-screen"
+          style={{
+            backgroundColor: "var(--bg)",
+            color: "var(--text-primary)",
+            transition: "background-color 0.3s ease, color 0.3s ease",
+          }}
+        >
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
 }
+
 
