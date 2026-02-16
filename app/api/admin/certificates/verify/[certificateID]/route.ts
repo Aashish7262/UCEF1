@@ -6,11 +6,11 @@ import { User } from "@/models/User";
 
 export async function GET(
   request: Request,
-  // 1. Ensure this matches your folder name [certificateID] exactly
+  // 1. MUST match your folder name [certificateID] exactly for the build to pass
   { params }: { params: Promise<{ certificateID: string }> } 
 ) {
   try {
-    // 2. Destructure certificateID (Capital D)
+    // 2. Extract with capital 'ID' from the promise
     const { certificateID } = await params;
 
     if (!certificateID) {
@@ -22,19 +22,23 @@ export async function GET(
 
     await connectDB();
 
-    // 3. Query the DB. Note: 'certificateId' is your schema field, 
-    // but 'certificateID' is the value from your URL
+    // 3. Query the DB. We use certificateID (from URL) to find certificateId (in MongoDB)
     const certificate = await Certificate.findOne({ certificateId: certificateID })
       .populate("student", "name email")
       .populate("event", "title");
 
+    // ❌ Handle Certificate Not Found
     if (!certificate) {
       return NextResponse.json(
-        { valid: false, message: "Certificate not found" },
+        {
+          valid: false,
+          message: "Certificate not found",
+        },
         { status: 404 }
       );
     }
 
+    // 🚨 Handle Revoked Certificate
     if (certificate.isRevoked) {
       return NextResponse.json(
         {
@@ -46,6 +50,7 @@ export async function GET(
       );
     }
 
+    // ✅ Success Response
     return NextResponse.json(
       {
         valid: true,
