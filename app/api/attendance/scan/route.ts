@@ -4,10 +4,11 @@ import { Event } from "@/models/Event";
 import { RoleAssignment } from "@/models/RoleAssignment";
 import { Attendance } from "@/models/Attendance";
 import { User } from "@/models/User";
-import { Certificate } from "@/models/Certificate"; // 🔥 NEW
+import { Certificate } from "@/models/Certificate";
 import { generateCertificate } from "@/lib/certificate";
 import { transporter } from "@/lib/mailer";
 import crypto from "crypto";
+import mongoose from "mongoose";
 
 export async function POST(req: Request) {
   try {
@@ -69,8 +70,8 @@ export async function POST(req: Request) {
 
     /* ================= GET APPROVED ROLES ================= */
     const approvedAssignments = await RoleAssignment.find({
-      event: eventId,
-      student: studentId,
+      event: new mongoose.Types.ObjectId(eventId),
+      student: new mongoose.Types.ObjectId(studentId),
       status: "approved",
     });
 
@@ -81,17 +82,17 @@ export async function POST(req: Request) {
       );
     }
 
-    /* ================= ROLE-BASED ATTENDANCE (NO DUPLICATES) ================= */
+    /* ================= ROLE-BASED ATTENDANCE ================= */
     const newlyCreatedCertificates: string[] = [];
     const newlyMarkedRoles: string[] = [];
 
     for (const assignment of approvedAssignments) {
       const role = assignment.role;
 
-      // 🔒 Prevent duplicate attendance per role
+      /* ================= PREVENT DUPLICATE ATTENDANCE ================= */
       const existingAttendance = await Attendance.findOne({
-        event: eventId,
-        student: studentId,
+        event: new mongoose.Types.ObjectId(eventId),
+        student: new mongoose.Types.ObjectId(studentId),
         role,
       });
 
@@ -102,8 +103,8 @@ export async function POST(req: Request) {
 
       /* ================= CREATE ATTENDANCE ================= */
       const attendance = await Attendance.create({
-        event: eventId,
-        student: studentId,
+        event: new mongoose.Types.ObjectId(eventId),
+        student: new mongoose.Types.ObjectId(studentId),
         role,
         status: "present",
       });
@@ -112,8 +113,8 @@ export async function POST(req: Request) {
 
       /* ================= CHECK IF CERTIFICATE ALREADY EXISTS ================= */
       const existingCertificate = await Certificate.findOne({
-        event: eventId,
-        student: studentId,
+        event: new mongoose.Types.ObjectId(eventId),
+        student: new mongoose.Types.ObjectId(studentId),
         role,
       });
 
@@ -125,19 +126,31 @@ export async function POST(req: Request) {
       /* ================= GENERATE UNIQUE CERTIFICATE ID ================= */
       const certificateId = `CERT-${crypto.randomUUID()}`;
 
-      /* ================= SAVE CERTIFICATE IN DB (VERY IMPORTANT) ================= */
-      await Certificate.create({
-        certificateId,
-        event: eventId,
-        student: studentId,
-        role,
-        attendance: attendance._id,
-        fileUrl: "email-pdf", // can be S3 later
-      });
+      /* ================= SAVE CERTIFICATE IN DB (CRITICAL FIX) ================= */
+      try {
+        await Certificate.create({
+          certificateId,
+          // 🔥 VERY IMPORTANT: store as ObjectId (NOT string)
+          event: new mongoose.Types.ObjectId(eventId),
+          student: new mongoose.Types.ObjectId(studentId),
+          role,
+          attendance: attendance._id,
+          fileUrl: "email-pdf",
+          isRevoked: false,
+        });
 
-      newlyCreatedCertificates.push(role);
+        newlyCreatedCertificates.push(role);
+        console.log("✅ Certificate saved in DB for role:", role);
+      } catch (certError: any) {
+        // Prevent crash on duplicate key
+        if (certError.code === 11000) {
+          console.log("⚠️ Duplicate certificate prevented safely");
+        } else {
+          throw certError;
+        }
+      }
 
-      /* ================= GENERATE BEAUTIFUL CERTIFICATE ================= */
+      /* ================= GENERATE CERTIFICATE PDF ================= */
       const eventDate = new Date(event.endDate).toDateString();
 
       const pdfBytes = await generateCertificate({
@@ -145,10 +158,10 @@ export async function POST(req: Request) {
         eventTitle: event.title,
         role,
         date: eventDate,
-        certificateId, // 🔥 REAL ID USED IN QR
+        certificateId,
       });
 
-      /* ================= SEND EMAIL ================= */
+      /* ================= SEND EMAIL WITH CERTIFICATE ================= */
       try {
         const mailInfo = await transporter.sendMail({
           from: `"HackathonHub" <${process.env.EMAIL_USER}>`,
@@ -158,7 +171,8 @@ export async function POST(req: Request) {
 
 Congratulations! 🎉
 
-Your attendance has been successfully verified for:
+Your attendance has been successfully verified.
+
 Event: ${event.title}
 Role: ${role}
 
@@ -211,4 +225,3 @@ HackathonHub Team 🚀`,
     );
   }
 }
-

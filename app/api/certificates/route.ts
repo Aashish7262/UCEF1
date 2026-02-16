@@ -3,13 +3,17 @@ import { connectDB } from "@/lib/db";
 import { Certificate } from "@/models/Certificate";
 import { Event } from "@/models/Event";
 import { User } from "@/models/User";
+import mongoose from "mongoose";
 
 export async function GET(req: Request) {
   try {
+    await connectDB();
+
     const { searchParams } = new URL(req.url);
     const eventId = searchParams.get("eventId");
     const adminId = searchParams.get("adminId");
 
+    /* ================= VALIDATION ================= */
     if (!eventId || !adminId) {
       return NextResponse.json(
         { message: "eventId and adminId are required" },
@@ -17,18 +21,26 @@ export async function GET(req: Request) {
       );
     }
 
-    await connectDB();
-
-    // 🔒 Check admin
-    const admin = await User.findById(adminId);
-    if (!admin || admin.role !== "admin") {
+    if (
+      !mongoose.Types.ObjectId.isValid(eventId) ||
+      !mongoose.Types.ObjectId.isValid(adminId)
+    ) {
       return NextResponse.json(
-        { message: "Only admin can view certificates" },
-        { status: 403 }
+        { message: "Invalid IDs" },
+        { status: 400 }
       );
     }
 
-    // 🔒 Check event ownership
+    /* ================= FETCH USER ================= */
+    const user = await User.findById(adminId);
+    if (!user) {
+      return NextResponse.json(
+        { message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    /* ================= FETCH EVENT ================= */
     const event = await Event.findById(eventId);
     if (!event) {
       return NextResponse.json(
@@ -37,28 +49,44 @@ export async function GET(req: Request) {
       );
     }
 
-    if (event.organizer.toString() !== admin._id.toString()) {
+    /* ================= AUTHORIZATION FIX ================= */
+    const isOrganizer =
+      event.organizer?.toString() === adminId.toString();
+
+    const isPlatformAdmin = user.role === "admin";
+
+    // 🔥 ALLOW BOTH ADMIN AND ORGANIZER (CRITICAL FIX)
+    if (!isOrganizer && !isPlatformAdmin) {
       return NextResponse.json(
-        { message: "You are not the organizer of this event" },
+        { message: "Unauthorized: Only organizer or admin allowed" },
         { status: 403 }
       );
     }
 
-    // 📜 Fetch certificates
-    const certificates = await Certificate.find({ event: eventId })
+    /* ================= FETCH CERTIFICATES ================= */
+    const certificates = await Certificate.find({
+      event: new mongoose.Types.ObjectId(eventId),
+    })
       .populate("student", "name email")
       .populate("event", "title")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log("🎓 Certificates Found:", certificates.length);
 
     return NextResponse.json(
       { certificates },
       { status: 200 }
     );
   } catch (error) {
-    console.error("ADMIN CERTIFICATES ERROR:", error);
+    console.error("GET CERTIFICATES ERROR:", error);
     return NextResponse.json(
       { message: "Failed to fetch certificates" },
       { status: 500 }
     );
   }
 }
+
+
+
+

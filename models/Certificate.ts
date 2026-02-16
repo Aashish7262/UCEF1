@@ -14,11 +14,11 @@ const CertificateSchema = new Schema(
       required: true,
     },
 
-    role: {
-      type: String,
-      enum: ["participant", "volunteer", "judge", "speaker"],
-      required: true,
-    },
+   role: {
+  type: String,
+  required: true,
+},
+
 
     attendance: {
       type: Schema.Types.ObjectId,

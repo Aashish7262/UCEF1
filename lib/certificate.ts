@@ -98,8 +98,8 @@ export async function generateCertificate({
 
   // 🔥 QR CODE (Verification Link)
 
-  // 🔥 QR CODE (Server-safe - NO fetch)
-const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify/${certificateId}`;
+const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/certificates/verify/${certificateId}`;
+
 const qrDataUrl = await QRCode.toDataURL(verifyUrl);
 
 // Convert base64 → buffer (safe for server)
