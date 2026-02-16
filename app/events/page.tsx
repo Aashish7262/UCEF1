@@ -11,7 +11,7 @@ interface EventType {
   eventDate: string;
   endDate: string;
   status: "draft" | "live" | "completed";
-  organizer: string; // NEW ARCHITECTURE
+  organizer: string | { _id: string }; // 🔥 handle populated + string
 }
 
 export default function EventsPage() {
@@ -27,33 +27,40 @@ export default function EventsPage() {
   const userId =
     typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
+  /* 🔥 SAFE ORGANIZER ID EXTRACTOR (CRITICAL FIX) */
+  const getOrganizerId = (organizer: string | { _id: string }) => {
+    if (!organizer) return "";
+    if (typeof organizer === "string") return organizer;
+    return organizer._id;
+  };
+
   /* ================= LOAD EVENTS ================= */
-  useEffect(() => {
+  const loadEvents = async () => {
     if (!role) return;
 
-    const loadEvents = async () => {
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
 
-        const res = await fetch(`/api/events?role=${role}`);
-        const data = await res.json();
+      const res = await fetch(`/api/events?role=${role}`);
+      const data = await res.json();
 
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to fetch events");
-        }
-
-        setEvents(data.events || []);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch events");
       }
-    };
 
+      setEvents(data.events || []);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadEvents();
   }, [role]);
 
-  /* ================= MAKE EVENT LIVE (ORGANIZER ONLY) ================= */
+  /* ================= MAKE EVENT LIVE ================= */
   const makeEventLive = async (eventId: string) => {
     if (!userId) return;
 
@@ -71,10 +78,7 @@ export default function EventsPage() {
         return;
       }
 
-      // Refresh events list
-      const updated = await fetch(`/api/events?role=${role}`);
-      const updatedData = await updated.json();
-      setEvents(updatedData.events || []);
+      await loadEvents();
     } catch {
       alert("Something went wrong");
     }
@@ -133,7 +137,10 @@ export default function EventsPage() {
             const endDate = new Date(event.endDate);
 
             const isExpired = now > endDate;
-            const isOrganizer = event.organizer === userId;
+
+            // 🔥 FINAL FIXED ORGANIZER CHECK
+            const isOrganizer =
+              getOrganizerId(event.organizer) === userId;
 
             return (
               <div
@@ -191,7 +198,7 @@ export default function EventsPage() {
                         View Details
                       </Link>
 
-                      {/* ORGANIZER CONTROLS */}
+                      {/* 🔥 ADMIN / ORGANIZER CONTROLS */}
                       {role === "admin" && isOrganizer && (
                         <>
                           {event.status === "draft" && !isExpired && (
@@ -206,20 +213,33 @@ export default function EventsPage() {
                           )}
 
                           {event.status === "live" && (
-                            <Link
-                              href={`/admin/events/${event._id}/roles`}
-                              className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
-                                         border border-white/20
-                                         hover:border-white hover:bg-white/10
-                                         transition-all"
-                            >
-                              Manage Roles
-                            </Link>
+                            <>
+                              {/* Manage Role Slots */}
+                              <Link
+                                href={`/admin/events/${event._id}/roles`}
+                                className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
+                                           border border-white/20
+                                           hover:border-white hover:bg-white/10
+                                           transition-all"
+                              >
+                                Manage Roles
+                              </Link>
+
+                              {/* 🔥 NEW: VIEW APPLICATIONS (APPROVE / REJECT PAGE) */}
+                              <Link
+                                href={`/admin/events/${event._id}/applications`}
+                                className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
+                                           bg-purple-500 hover:bg-purple-600
+                                           transition-all font-semibold"
+                              >
+                                Applications
+                              </Link>
+                            </>
                           )}
                         </>
                       )}
 
-                      {/* STUDENT FLOW (NEW ARCHITECTURE) */}
+                      {/* 🔥 STUDENT FLOW */}
                       {role === "student" && !isExpired && (
                         <>
                           {event.status === "draft" && (
@@ -227,18 +247,17 @@ export default function EventsPage() {
                               Roles Coming Soon
                             </span>
                           )}
-{/* STUDENT: APPLY FOR ROLES (NEW ROLE-BASED SYSTEM) */}
-{role === "student" && event.status === "live" && !isExpired && (
-  <Link
-    href={`/events/${event._id}/roles`}
-    className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
-               bg-blue-500 hover:bg-blue-600
-               transition-all"
-  >
-    Apply for Roles
-  </Link>
-)}
 
+                          {event.status === "live" && (
+                            <Link
+                              href={`/events/${event._id}/roles`}
+                              className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm
+                                         bg-blue-500 hover:bg-blue-600
+                                         transition-all"
+                            >
+                              Apply for Roles
+                            </Link>
+                          )}
                         </>
                       )}
                     </div>

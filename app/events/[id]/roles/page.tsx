@@ -13,14 +13,14 @@ interface RoleSlot {
 
 interface Application {
   _id: string;
-  roleSlot: string;
+  roleSlot: string | { _id: string };
   role: string;
   status: "pending" | "approved" | "rejected";
 }
 
 export default function StudentRolesPage() {
   const params = useParams();
-  const eventId = params?.id as string; // 🔥 FIXED (App Router safe)
+  const eventId = params?.id as string;
 
   const [roleSlots, setRoleSlots] = useState<RoleSlot[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
@@ -32,48 +32,56 @@ export default function StudentRolesPage() {
       ? localStorage.getItem("userId")
       : null;
 
-  /* ================= FETCH ROLE SLOTS + MY APPLICATIONS ================= */
-  useEffect(() => {
+  /* 🔥 Handles both string ID and populated object */
+  const getRoleSlotId = (roleSlot: string | { _id: string }) => {
+    if (!roleSlot) return "";
+    if (typeof roleSlot === "string") return roleSlot;
+    return roleSlot._id;
+  };
+
+  /* ================= FETCH ROLE SLOTS + APPLICATIONS ================= */
+  const fetchAllData = async () => {
     if (!eventId || !studentId) return;
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-        // 🔥 YOUR API RETURNS: { slots: [...] } NOT roleSlots
-        const slotsRes = await fetch(
-          `/api/events/${eventId}/roleslots`
-        );
-        const slotsData = await slotsRes.json();
+      // 1️⃣ Fetch role slots
+      const slotsRes = await fetch(
+        `/api/events/${eventId}/roleslots`
+      );
+      const slotsData = await slotsRes.json();
 
-        console.log("Slots API Response:", slotsData); // DEBUG
-
-        if (!slotsRes.ok) {
-          throw new Error(slotsData.message || "Failed to load roles");
-        }
-
-        // 🔥 MAIN FIX: use slots instead of roleSlots
-        setRoleSlots(slotsData.slots || []);
-
-        // Fetch student's applications
-        const appRes = await fetch(
-          `/api/roles/my-applications?eventId=${eventId}&studentId=${studentId}`
-        );
-        const appData = await appRes.json();
-
-        if (appRes.ok) {
-          setApplications(appData.applications || []);
-        }
-      } catch (err: any) {
-        console.error("Roles Fetch Error:", err);
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
+      if (!slotsRes.ok) {
+        throw new Error(slotsData.message || "Failed to load roles");
       }
-    };
 
-    fetchData();
+      // Your API returns { slots }
+      setRoleSlots(slotsData.slots || []);
+
+      // 2️⃣ Fetch student applications (🔥 SOURCE OF TRUTH)
+      const appRes = await fetch(
+        `/api/roles/my-applications?eventId=${eventId}&studentId=${studentId}`
+      );
+      const appData = await appRes.json();
+
+      if (!appRes.ok) {
+        throw new Error(appData.message || "Failed to load applications");
+      }
+
+      // 🔥 CRITICAL FIX: your API returns "assignments" NOT "applications"
+      setApplications(appData.assignments || []);
+    } catch (err: any) {
+      console.error("Fetch Error:", err);
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData();
   }, [eventId, studentId]);
 
   /* ================= APPLY FOR ROLE ================= */
@@ -83,9 +91,19 @@ export default function StudentRolesPage() {
       return;
     }
 
+    // Prevent duplicate apply instantly
+    const alreadyApplied = applications.some(
+      (app) => getRoleSlotId(app.roleSlot) === roleSlotId
+    );
+
+    if (alreadyApplied) {
+      alert("You already applied to this role");
+      return;
+    }
+
     try {
       const res = await fetch("/api/roles/apply", {
-        method: "POST", // ✅ CORRECT METHOD
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventId,
@@ -103,16 +121,19 @@ export default function StudentRolesPage() {
 
       alert("Application submitted for approval");
 
-      // 🔥 Instant UI update
-      setApplications((prev) => [...prev, data.assignment]);
+      // 🔥 Always refetch from DB so status persists after refresh
+      await fetchAllData();
     } catch (error) {
       console.error("Apply Error:", error);
       alert("Something went wrong while applying");
     }
   };
 
-  const getStatusForSlot = (slotId: string) => {
-    return applications.find((a) => a.roleSlot === slotId);
+  /* 🔥 Matching logic (works with populated roleSlot) */
+  const getApplicationForSlot = (slotId: string) => {
+    return applications.find(
+      (app) => getRoleSlotId(app.roleSlot) === slotId
+    );
   };
 
   if (loading) {
@@ -144,7 +165,7 @@ export default function StudentRolesPage() {
       ) : (
         <div className="grid gap-6">
           {roleSlots.map((slot) => {
-            const application = getStatusForSlot(slot._id);
+            const application = getApplicationForSlot(slot._id);
 
             return (
               <div
@@ -195,3 +216,6 @@ export default function StudentRolesPage() {
     </main>
   );
 }
+
+
+
