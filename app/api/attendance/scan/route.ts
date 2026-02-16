@@ -4,8 +4,10 @@ import { Event } from "@/models/Event";
 import { RoleAssignment } from "@/models/RoleAssignment";
 import { Attendance } from "@/models/Attendance";
 import { User } from "@/models/User";
+import { Certificate } from "@/models/Certificate"; // 🔥 NEW
 import { generateCertificate } from "@/lib/certificate";
 import { transporter } from "@/lib/mailer";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
@@ -55,10 +57,9 @@ export async function POST(req: Request) {
       );
     }
 
-    /* ================= TIME SECURITY (REALISTIC) ================= */
+    /* ================= TIME SECURITY ================= */
     const now = new Date();
     const end = new Date(event.endDate);
-
     if (now > end) {
       return NextResponse.json(
         { message: "Event has already ended" },
@@ -81,80 +82,90 @@ export async function POST(req: Request) {
     }
 
     /* ================= ROLE-BASED ATTENDANCE (NO DUPLICATES) ================= */
-    const newlyMarkedAttendances = [];
+    const newlyCreatedCertificates: string[] = [];
+    const newlyMarkedRoles: string[] = [];
 
     for (const assignment of approvedAssignments) {
       const role = assignment.role;
 
-      // 🔒 Prevent duplicate attendance for SAME role + student + event
+      // 🔒 Prevent duplicate attendance per role
       const existingAttendance = await Attendance.findOne({
         event: eventId,
         student: studentId,
-        role: role,
+        role,
       });
 
       if (existingAttendance) {
-        console.log(
-          `⚠️ Attendance already exists for role: ${role}, skipping`
-        );
-        continue; // Skip duplicate role attendance
+        console.log(`⚠️ Attendance already exists for role: ${role}`);
+        continue;
       }
 
-      // ✅ Create attendance ONLY if not already marked
+      /* ================= CREATE ATTENDANCE ================= */
       const attendance = await Attendance.create({
         event: eventId,
         student: studentId,
-        role: role,
+        role,
         status: "present",
       });
 
-      newlyMarkedAttendances.push(attendance);
-    }
+      newlyMarkedRoles.push(role);
 
-    /* ================= IF NOTHING NEW MARKED ================= */
-    if (newlyMarkedAttendances.length === 0) {
-      return NextResponse.json(
-        {
-          message:
-            "Attendance already marked for all approved roles (No duplicates allowed)",
-        },
-        { status: 200 }
-      );
-    }
+      /* ================= CHECK IF CERTIFICATE ALREADY EXISTS ================= */
+      const existingCertificate = await Certificate.findOne({
+        event: eventId,
+        student: studentId,
+        role,
+      });
 
-    /* ================= SEND CERTIFICATES (ONLY NEW ROLES) ================= */
-    try {
+      if (existingCertificate) {
+        console.log(`🎓 Certificate already exists for role: ${role}`);
+        continue;
+      }
+
+      /* ================= GENERATE UNIQUE CERTIFICATE ID ================= */
+      const certificateId = `CERT-${crypto.randomUUID()}`;
+
+      /* ================= SAVE CERTIFICATE IN DB (VERY IMPORTANT) ================= */
+      await Certificate.create({
+        certificateId,
+        event: eventId,
+        student: studentId,
+        role,
+        attendance: attendance._id,
+        fileUrl: "email-pdf", // can be S3 later
+      });
+
+      newlyCreatedCertificates.push(role);
+
+      /* ================= GENERATE BEAUTIFUL CERTIFICATE ================= */
       const eventDate = new Date(event.endDate).toDateString();
 
-      for (const attendance of newlyMarkedAttendances) {
-        const role = attendance.role;
+      const pdfBytes = await generateCertificate({
+        studentName: student.name,
+        eventTitle: event.title,
+        role,
+        date: eventDate,
+        certificateId, // 🔥 REAL ID USED IN QR
+      });
 
-        console.log(
-          `📧 Generating certificate for ${student.email} | Role: ${role}`
-        );
-
-        // 🎓 Generate PDF Certificate
-        const pdfBytes = await generateCertificate({
-          studentName: student.name,
-          eventTitle: event.title,
-          role: role,
-          date: eventDate,
-        });
-
-        // 📩 Send Email with Certificate
+      /* ================= SEND EMAIL ================= */
+      try {
         const mailInfo = await transporter.sendMail({
           from: `"HackathonHub" <${process.env.EMAIL_USER}>`,
           to: student.email,
-          subject: `🎓 Certificate - ${event.title} (${role})`,
+          subject: `🎓 Verified Certificate - ${event.title} (${role})`,
           text: `Hello ${student.name},
 
 Congratulations! 🎉
 
-Your attendance has been successfully marked for the role: ${role} in the event "${event.title}".
+Your attendance has been successfully verified for:
+Event: ${event.title}
+Role: ${role}
 
-Please find your certificate attached.
+Your certificate is attached.
+You can verify authenticity by scanning the QR on the certificate.
 
-Best Regards,  
+Regards,
 HackathonHub Team 🚀`,
           attachments: [
             {
@@ -165,24 +176,30 @@ HackathonHub Team 🚀`,
           ],
         });
 
-        console.log(
-          "✅ Certificate email sent:",
-          mailInfo.messageId
-        );
+        console.log("✅ Certificate email sent:", mailInfo.messageId);
+      } catch (mailError) {
+        console.error("❌ EMAIL ERROR:", mailError);
       }
-    } catch (mailError) {
-      // ⚠️ Do NOT fail attendance if email fails (production best practice)
-      console.error("❌ CERTIFICATE EMAIL ERROR:", mailError);
+    }
+
+    /* ================= NOTHING NEW ================= */
+    if (newlyMarkedRoles.length === 0) {
+      return NextResponse.json(
+        {
+          message:
+            "Attendance already marked for all approved roles (No duplicates allowed)",
+        },
+        { status: 200 }
+      );
     }
 
     /* ================= FINAL RESPONSE ================= */
     return NextResponse.json(
       {
         message:
-          "Attendance marked successfully & certificates sent for new roles",
-        rolesMarked: newlyMarkedAttendances.map(
-          (a) => a.role
-        ),
+          "Attendance marked & verified certificates generated successfully",
+        rolesMarked: newlyMarkedRoles,
+        certificatesGenerated: newlyCreatedCertificates,
       },
       { status: 201 }
     );
@@ -194,3 +211,4 @@ HackathonHub Team 🚀`,
     );
   }
 }
+

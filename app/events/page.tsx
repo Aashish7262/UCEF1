@@ -234,6 +234,17 @@ export default function EventsPage() {
                               >
                                 Applications
                               </Link>
+                              {isOrganizer && (
+  <Link
+    href={`/admin/events/${event._id}/certificates`}
+    className="px-6 py-3 rounded-xl font-semibold
+               bg-gradient-to-r from-yellow-400 to-pink-500
+               text-black hover:brightness-110 transition"
+  >
+    View Issued Certificates
+  </Link>
+)}
+
                             </>
                           )}
                         </>

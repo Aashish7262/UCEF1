@@ -30,6 +30,10 @@ const CertificateSchema = new Schema(
       type: String,
       required: true,
     },
+    certificateId: {
+      type: String,
+      required: true,
+      unique: true, },
 
     isRevoked: {
       type: Boolean,
