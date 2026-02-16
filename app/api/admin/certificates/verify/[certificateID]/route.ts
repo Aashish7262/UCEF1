@@ -5,13 +5,14 @@ import { Event } from "@/models/Event";
 import { User } from "@/models/User";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { certificateId: string } }
+  request: Request,
+  { params }: { params: Promise<{ certificateID: string }> }
 ) {
   try {
-    const { certificateId } = params;
+    // 1. Extract the ID with the correct casing 'certificateID' to match params
+    const { certificateID } = await params;
 
-    if (!certificateId) {
+    if (!certificateID) {
       return NextResponse.json(
         { valid: false, message: "Certificate ID is required" },
         { status: 400 }
@@ -20,8 +21,9 @@ export async function GET(
 
     await connectDB();
 
-    // 🔍 Find certificate with populated data
-    const certificate = await Certificate.findOne({ certificateId })
+    // 2. Query the database using the extracted certificateID.
+    // Ensure 'certificateId' matches the field name in your MongoDB Certificate model.
+    const certificate = await Certificate.findOne({ certificateId: certificateID })
       .populate("student", "name email")
       .populate("event", "title");
 
