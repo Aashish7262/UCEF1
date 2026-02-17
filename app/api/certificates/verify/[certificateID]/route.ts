@@ -7,15 +7,25 @@ import "@/models/User";
 import "@/models/Event";
 import { Certificate } from "@/models/Certificate";
 
+// Interface for clean Lean documents
+interface PopulatedCert {
+  certificateId: string;
+  role: string;
+  isRevoked: boolean;
+  createdAt: Date;
+  student?: { name: string; email: string };
+  event?: { title: string };
+}
+
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ certificateId: string }> } 
+  { params }: { params: Promise<{ certificateID: string }> } 
 ) {
   try {
-    // 1. Unwrap params (Next.js requirement)
-    const { certificateId } = await params;
+    // 1. Await and extract exactly as defined in the type above
+    const { certificateID } = await params;
 
-    if (!certificateId) {
+    if (!certificateID) {
       return NextResponse.json(
         { valid: false, message: "Certificate ID is required" },
         { status: 400 }
@@ -24,18 +34,19 @@ export async function GET(
 
     await connectDB();
 
-    /* ================= PRIMARY SEARCH (by custom certificateId) ================= */
-    let cert = await Certificate.findOne({ certificateId })
+    /* ================= PRIMARY SEARCH ================= */
+    // Search the 'certificateId' field in DB using 'certificateID' from the URL
+    let cert = await Certificate.findOne({ certificateId: certificateID })
       .populate("student", "name email")
       .populate("event", "title")
-      .lean();
+      .lean() as unknown as PopulatedCert;
 
-    /* ================= FALLBACK: If QR sends Mongo _id ================= */
-    if (!cert && mongoose.Types.ObjectId.isValid(certificateId)) {
-      cert = await Certificate.findById(certificateId)
+    /* ================= FALLBACK: Search by Mongo _id ================= */
+    if (!cert && mongoose.Types.ObjectId.isValid(certificateID)) {
+      cert = await Certificate.findById(certificateID)
         .populate("student", "name email")
         .populate("event", "title")
-        .lean();
+        .lean() as unknown as PopulatedCert;
     }
 
     /* ================= NOT FOUND ================= */
