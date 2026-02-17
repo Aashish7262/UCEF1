@@ -1,4 +1,4 @@
-🚀 HackathonHub
+ HackathonHub
 
 HackathonHub is a full-stack web platform designed to simplify hackathon management, student participation tracking, analytics visualization, AI mentoring, and resume generation.
 
@@ -8,8 +8,8 @@ Admins with powerful tools to manage hackathons and analyze engagement
 
 Students with dashboards to track participation, earn certificates, and build professional resumes using AI
 
-✨ Core Modules
-🛠 Admin Panel
+ Core Modules
+ Admin Panel
 
 Create and manage hackathons & events
 
@@ -45,7 +45,7 @@ Visual analytics using charts
 
 JWT-based authentication
 
-📄 Resume Builder
+ Resume Builder
 
 Interactive resume creation form
 
@@ -69,7 +69,7 @@ Export resume as a clean, professional PDF
 
 ATS-friendly formatting
 
-💳 Hackathon Payment Module
+ Hackathon Payment Module
 
 Optional paid registration per hackathon
 
@@ -93,7 +93,7 @@ Prevents duplicate or unpaid registrations
 
 Designed to support future payment gateway integrations (e.g., Razorpay – test mode)
 
-🤖 Artificial Intelligence (AI)
+ Artificial Intelligence (AI)
 
 Powered by Google Gemini API:
 
@@ -107,7 +107,7 @@ AI Student Mentor insights
 
 Resume content optimization (ATS-friendly)
 
-📊 Analytics & Visualization
+ Analytics & Visualization
 
 Pie Charts – student participation insights
 
@@ -117,14 +117,14 @@ Built using Recharts
 
 Fully responsive dashboards
 
-🔐 QR-Based Attendance & Certificate System
-📌 QR Code Generation
+ QR-Based Attendance & Certificate System
+ QR Code Generation
 
 A unique QR code is generated for every hackathon/event
 
 Encodes event-specific and user-specific information securely
 
-📲 QR-Based Attendance
+ QR-Based Attendance
 
 Participants scan the QR code during the event
 
@@ -134,7 +134,7 @@ Attendance is marked automatically
 
 Duplicate or invalid scans are prevented
 
-🧾 Automatic Certificate Generation
+ Automatic Certificate Generation
 
 After verified attendance:
 
@@ -142,7 +142,7 @@ A digital certificate (PDF) is generated dynamically
 
 Includes participant name, event details, and unique verification ID
 
-📧 Certificate Delivery via Email
+ Certificate Delivery via Email
 
 Certificates are:
 
@@ -152,7 +152,7 @@ Automatically sent to the participant’s registered email
 
 Students can also download certificates anytime from their dashboard
 
-✅ Certificate Verification
+ Certificate Verification
 
 Each certificate contains a QR code
 
@@ -160,7 +160,7 @@ Scanning the QR code redirects to a public verification page
 
 Confirms authenticity of the certificate
 
-🧰 Tech Stack
+ Tech Stack
 Frontend
 
 Next.js (App Router)
